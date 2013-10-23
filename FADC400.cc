@@ -61,7 +61,6 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   // ==== Start of Module 1 =======================================================
   fTextAddress = new TGLabel(fFADC1, "Address:");
   fTextAddress -> Move(10, 10);
-  fFADC1 -> AddFrame(fTextAddress);
 
   fCBAddress1 = new TGComboBox(fFADC1);
   for (Int_t i = 0; i < 6; i++)
@@ -107,6 +106,19 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   Int_t channelTabHeight = 300;
   fChannelTab1 -> MoveResize(channelTabHMargin, 45, channelTabWidth, channelTabHeight);
   fFADC1 -> AddFrame(fChannelFrame1, new TGLayoutHints(kLHintsLeft|kLHintsTop));
+
+  fTextDSM = new TGLabel(fCh11, "Data saving mode");
+  fTextDSM -> Move(10, 10);
+  fTextIP = new TGLabel(fCh11, "Input polarity");
+  fTextIP -> Move(10, 30);
+  fTextID = new TGLabel(fCh11, "Input delay (0 ~ 40900) (ns)");
+  fTextID -> Move(10, 50);
+  fTextAO = new TGLabel(fCh11, "ADC Offset (0 ~ 4095) (ns)");
+  fTextAO -> Move(10, 70);
+  fTextThres = new TGLabel(fCh11, "Threshold (0 ~ 1023)");
+  fTextThres -> Move(10, 90);
+  fTextRL = new TGLabel(fCh11, "Recording length (us)");
+  fTextRL -> Move(10, 110);
   // ======== End of Channel Tab ====================================================
   // ====== End of Channel Setting Frame ==========================================
   // ==== End of Module 1 =========================================================

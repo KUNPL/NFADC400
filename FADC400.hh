@@ -50,6 +50,13 @@ class FADC400 : public TGMainFrame
     // Variables used in common to two modules
     TGLabel *fTextAddress;
 
+    TGLabel *fTextDSM;
+    TGLabel *fTextIP;
+    TGLabel *fTextID;
+    TGLabel *fTextAO;
+    TGLabel *fTextThres;
+    TGLabel *fTextRL;
+
     // Module 1
     TGComboBox *fCBAddress1;
     Int_t fValueAddress1;
