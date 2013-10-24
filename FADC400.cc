@@ -63,17 +63,17 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fTextAddress = new TGLabel(fFADC[iModule], "Address:");
     fTextAddress -> Move(10, 10);
 
-    fCBAddress[iModule] = new TGComboBox(fFADC[iModule]);
+    fCBAddress[iModule] = new TGComboBox(fFADC[iModule], iModule);
     for (Int_t iAddress = 0; iAddress < 6; iAddress++)
       fCBAddress[iModule] -> AddEntry(Form("%d", iAddress), iAddress);
   
     fCBAddress[iModule] -> Select(3 + iModule);
-    fCBAddress[iModule] -> Connect("Selected(Int_t)", "FADC400", this, Form("SetAddress%d(Int_t)", iModule));
+    fCBAddress[iModule] -> Connect("Selected(Int_t)", "FADC400", this, "SetAddress(Int_t)");
     fCBAddress[iModule] -> MoveResize(70, 8, 50, 20);
     fFADC[iModule] -> AddFrame(fCBAddress[iModule]);
 
-    fActive[iModule] = new TGCheckButton(fFADC[iModule], "Active");
-    fActive[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, Form("SetActive%d(Bool_t)", iModule));
+    fActive[iModule] = new TGCheckButton(fFADC[iModule], "Active", iModule);
+    fActive[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetActive(Bool_t)");
     fActive[iModule] -> Move(140, 10);
 
     // ====== Start of Channel Setting Frame ========================================
@@ -88,8 +88,8 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule]);
 
     // ======== Start of Channel Tab ==================================================
-    fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channel.");
-    fSameChannelSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, Form("SetSameChannelSetting%d(Bool_t)", iModule));
+    fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channel.", iModule);
+    fSameChannelSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameChannelSetting(Bool_t)");
     fSameChannelSettingButton[iModule] -> Move(10, 20);
 
     fChannelTab[iModule] = new TGTab(fChannelFrame[iModule]);
@@ -123,56 +123,6 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     // ====== End of Channel Setting Frame ==========================================
   }
   // ==== End of Modules  =========================================================
-
-/*
-  // ==== Start of Module 2 =======================================================
-  fTextAddress = new TGLabel(fFADC2, "Address:");
-  fTextAddress -> Move(10, 10);
-  fFADC2 -> AddFrame(fTextAddress);
-
-  fCBAddress2 = new TGComboBox(fFADC2);
-  for (Int_t i = 0; i < 6; i++)
-    fCBAddress2 -> AddEntry(Form("%d", i), i);
-  fCBAddress2 -> Select(4);
-  fCBAddress2 -> Connect("Selected(Int_t)", "FADC400", this, "SetAddress2(Int_t)");
-  fCBAddress2 -> MoveResize(70, 8, 50, 20);
-  fFADC2 -> AddFrame(fCBAddress2);
-
-  fActive2 = new TGCheckButton(fFADC2, "Active");
-  fActive2 -> Connect("Toggled(Bool_t)", "FADC400", this, "SetActive2(Bool_t)");
-  fActive2 -> Move(140, 10);
-
-  // ====== Start of Channel Setting Frame ========================================
-  fChannelFrame2 = new TGGroupFrame(fFADC2, "Channel Setting");
-  fChannelFrame2 -> SetLayoutBroken(kTRUE);
-
-  fChannelFrame2 -> MoveResize(channelFrameHMargin, 45, channelFrameWidth, channelFrameHeight);
-  fFADC2 -> AddFrame(fChannelFrame2);
-
-  // ======== Start of Channel Tab ==================================================
-  fSameChannelSettingButton2 = new TGCheckButton(fChannelFrame2, "Use the same settings for all channel.");
-  fSameChannelSettingButton2 -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameChannelSetting2(Bool_t)");
-  fSameChannelSettingButton2 -> Move(10, 20);
-
-  fChannelTab2 = new TGTab(fChannelFrame2);
-  fCh21 = fChannelTab2 -> AddTab("Channel 1");
-  fCh21 -> SetLayoutBroken(kTRUE);
-  fCh22 = fChannelTab2 -> AddTab("Channel 2");
-  fCh22 -> SetLayoutBroken(kTRUE);
-  fCh23 = fChannelTab2 -> AddTab("Channel 3");
-  fCh23 -> SetLayoutBroken(kTRUE);
-  fCh24 = fChannelTab2 -> AddTab("Channel 4");
-  fCh24 -> SetLayoutBroken(kTRUE);
-
-  fChannelFrame2 -> AddFrame(fChannelTab2, new TGLayoutHints(kLHintsLeft|kLHintsTop));
-  fChannelTab2 -> MoveResize(channelTabHMargin, 45, channelTabWidth, channelTabHeight);
-  fFADC2 -> AddFrame(fChannelFrame2, new TGLayoutHints(kLHintsLeft|kLHintsTop));
-  // ======== End of Channel Tab ====================================================
-  // ====== End of Channel Setting Frame ==========================================
-  // ==== End of Module 1 =========================================================
-  // ==== End of Module 2 =========================================================
-  */
-
   // == End of Module Frame =======================================================
 
   MapSubwindows();
@@ -195,70 +145,46 @@ void FADC400::SetSameModuleSetting(Bool_t value)
   fUseSameModuleSetting = value;
 }
 
-void FADC400::SetAddress1(Int_t value)
+void FADC400::SetAddress(Int_t value)
 {
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t module = object -> WidgetId();
+
   if (fIsDebug) {
     cout << "==============================" << endl;
-    cout << " SetAddress1 is " << value << "!" << endl;
+    cout << " SetAddress" << module << " is " << value << "!" << endl;
     cout << "==============================" << endl;
   }
 
-  fValueAddress[0] = value;
+  fValueAddress[module] = value;
 }
 
-void FADC400::SetActive1(Bool_t value)
+void FADC400::SetActive(Bool_t value)
 {
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t module = object -> WidgetId();
+
   if (fIsDebug) {
     cout << "============================" << endl;
-    cout << " SetActive1 is " << ( value ? "Activated!" : "Deactivated!" ) << endl;
-    cout << "============================" << endl;
-  }
-
-  fIsActive[0] = value;
-}
-
-void FADC400::SetSameChannelSetting1(Bool_t value)
-{
-  if (fIsDebug) {
-    cout << "================================" << endl;
-    cout << " SetSameChannelSetting1 is " << ( value ? "On!" : "Off!" ) << endl;
-    cout << "================================" << endl;
-  }
-
-  fUseSameChannelSetting[0] = value;
-}
-
-void FADC400::SetAddress2(Int_t value)
-{
-  if (fIsDebug) {
-    cout << "======================" << endl;
-    cout << " SetAddress2 is " << value << "!" << endl;
-    cout << "======================" << endl;
-  }
-
-  fValueAddress[1] = value;
-}
-
-void FADC400::SetActive2(Bool_t value)
-{
-  if (fIsDebug) {
-    cout << "============================" << endl;
-    cout << " SetActive2 is " << ( value ? "Activated!" : "Deactivated!" ) << endl;
+    cout << " SetActive" << module << " is " << ( value ? "Activated!" : "Deactivated!" ) << endl;
     cout << "============================" << endl;
   }
 
-  fIsActive[1] = value;
+  fIsActive[module] = value;
 }
 
-void FADC400::SetSameChannelSetting2(Bool_t value)
+void FADC400::SetSameChannelSetting(Bool_t value)
 {
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t module = object -> WidgetId();
+
   if (fIsDebug) {
     cout << "================================" << endl;
-    cout << " SetSameChannelSetting2 is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << " SetSameChannelSetting" << module << " is " << ( value ? "On!" : "Off!" ) << endl;
     cout << "================================" << endl;
   }
 
-  fUseSameChannelSetting[1] = value;
+  fUseSameChannelSetting[module] = value;
 }
 
 Int_t main(int argc, char **argv)

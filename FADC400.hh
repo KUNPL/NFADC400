@@ -28,13 +28,9 @@ class FADC400 : public TGMainFrame
 
     void SetSameModuleSetting(Bool_t);
 
-    void SetAddress1(Int_t);
-    void SetActive1(Bool_t);
-    void SetSameChannelSetting1(Bool_t);
-
-    void SetAddress2(Int_t);
-    void SetActive2(Bool_t);
-    void SetSameChannelSetting2(Bool_t);
+    void SetAddress(Int_t);
+    void SetActive(Bool_t);
+    void SetSameChannelSetting(Bool_t);
 
   private:
     Bool_t fIsDebug;
