@@ -46,10 +46,10 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fSameModuleSettingButton -> Move(10, 20);
 
   fModuleTab = new TGTab(fModuleFrame);
-  fFADC1 = fModuleTab -> AddTab("FADC400 Module 1");
-  fFADC1 -> SetLayoutBroken(kTRUE);
-  fFADC2 = fModuleTab -> AddTab("FADC400 Module 2");
-  fFADC2 -> SetLayoutBroken(kTRUE);
+  fFADC[0] = fModuleTab -> AddTab("FADC400 Module 1");
+  fFADC[0] -> SetLayoutBroken(kTRUE);
+  fFADC[1] = fModuleTab -> AddTab("FADC400 Module 2");
+  fFADC[1] -> SetLayoutBroken(kTRUE);
 
   fModuleFrame -> AddFrame(fModuleTab, new TGLayoutHints(kLHintsLeft|kLHintsTop));
   Int_t moduleTabHMargin = 10;
@@ -58,71 +58,73 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fModuleTab -> MoveResize(moduleTabHMargin, 45, moduleTabWidth, moduleTabHeight);
   AddFrame(fModuleFrame, new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
-  // ==== Start of Module 1 =======================================================
-  fTextAddress = new TGLabel(fFADC1, "Address:");
-  fTextAddress -> Move(10, 10);
+  // ==== Start of Modules  =======================================================
+  for (Int_t iModule = 0; iModule < 2; iModule++) {
+    fTextAddress = new TGLabel(fFADC[iModule], "Address:");
+    fTextAddress -> Move(10, 10);
 
-  fCBAddress1 = new TGComboBox(fFADC1);
-  for (Int_t i = 0; i < 6; i++)
-    fCBAddress1 -> AddEntry(Form("%d", i), i);
-  fCBAddress1 -> Select(3);
-  fCBAddress1 -> Connect("Selected(Int_t)", "FADC400", this, "SetAddress1(Int_t)");
-  fCBAddress1 -> MoveResize(70, 8, 50, 20);
-  fFADC1 -> AddFrame(fCBAddress1);
+    fCBAddress[iModule] = new TGComboBox(fFADC[iModule]);
+    for (Int_t iAddress = 0; iAddress < 6; iAddress++)
+      fCBAddress[iModule] -> AddEntry(Form("%d", iAddress), iAddress);
+  
+    fCBAddress[iModule] -> Select(3 + iModule);
+    fCBAddress[iModule] -> Connect("Selected(Int_t)", "FADC400", this, Form("SetAddress%d(Int_t)", iModule));
+    fCBAddress[iModule] -> MoveResize(70, 8, 50, 20);
+    fFADC[iModule] -> AddFrame(fCBAddress[iModule]);
 
-  fActive1 = new TGCheckButton(fFADC1, "Active");
-  fActive1 -> Connect("Toggled(Bool_t)", "FADC400", this, "SetActive1(Bool_t)");
-  fActive1 -> Move(140, 10);
+    fActive[iModule] = new TGCheckButton(fFADC[iModule], "Active");
+    fActive[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, Form("SetActive%d(Bool_t)", iModule));
+    fActive[iModule] -> Move(140, 10);
 
-  // ====== Start of Channel Setting Frame ========================================
-  fChannelFrame1 = new TGGroupFrame(fFADC1, "Channel Setting");
-  fChannelFrame1 -> SetLayoutBroken(kTRUE);
+    // ====== Start of Channel Setting Frame ========================================
+    fChannelFrame[iModule] = new TGGroupFrame(fFADC[iModule], "Channel Setting");
+    fChannelFrame[iModule] -> SetLayoutBroken(kTRUE);
 
-  Int_t channelFrameHMargin = 10;
-  Int_t channelFrameVMargin = 10;
-  Int_t channelFrameWidth = moduleTabWidth - 2.5*moduleTabHMargin;
-  Int_t channelFrameHeight = 400;
-  fChannelFrame1 -> MoveResize(channelFrameHMargin, 45, channelFrameWidth, channelFrameHeight);
-  fFADC1 -> AddFrame(fChannelFrame1);
+    Int_t channelFrameHMargin = 10;
+    Int_t channelFrameVMargin = 10;
+    Int_t channelFrameWidth = moduleTabWidth - 2.5*moduleTabHMargin;
+    Int_t channelFrameHeight = 400;
+    fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 45, channelFrameWidth, channelFrameHeight);
+    fFADC[iModule] -> AddFrame(fChannelFrame[iModule]);
 
-  // ======== Start of Channel Tab ==================================================
-  fSameChannelSettingButton1 = new TGCheckButton(fChannelFrame1, "Use the same settings for all channel.");
-  fSameChannelSettingButton1 -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameChannelSetting1(Bool_t)");
-  fSameChannelSettingButton1 -> Move(10, 20);
+    // ======== Start of Channel Tab ==================================================
+    fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channel.");
+    fSameChannelSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, Form("SetSameChannelSetting%d(Bool_t)", iModule));
+    fSameChannelSettingButton[iModule] -> Move(10, 20);
 
-  fChannelTab1 = new TGTab(fChannelFrame1);
-  fCh11 = fChannelTab1 -> AddTab("Channel 1");
-  fCh11 -> SetLayoutBroken(kTRUE);
-  fCh12 = fChannelTab1 -> AddTab("Channel 2");
-  fCh12 -> SetLayoutBroken(kTRUE);
-  fCh13 = fChannelTab1 -> AddTab("Channel 3");
-  fCh13 -> SetLayoutBroken(kTRUE);
-  fCh14 = fChannelTab1 -> AddTab("Channel 4");
-  fCh14 -> SetLayoutBroken(kTRUE);
+    fChannelTab[iModule] = new TGTab(fChannelFrame[iModule]);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fCh[iModule][iChannel] = fChannelTab[iModule] -> AddTab(Form("Channel %d", iChannel));
+      fCh[iModule][iChannel] -> SetLayoutBroken(kTRUE);
+    }
 
-  fChannelFrame1 -> AddFrame(fChannelTab1, new TGLayoutHints(kLHintsLeft|kLHintsTop));
-  Int_t channelTabHMargin = 10;
-  Int_t channelTabWidth = channelFrameWidth - 2*channelTabHMargin;
-  Int_t channelTabHeight = 300;
-  fChannelTab1 -> MoveResize(channelTabHMargin, 45, channelTabWidth, channelTabHeight);
-  fFADC1 -> AddFrame(fChannelFrame1, new TGLayoutHints(kLHintsLeft|kLHintsTop));
+    fChannelFrame[iModule] -> AddFrame(fChannelTab[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
+    Int_t channelTabHMargin = 10;
+    Int_t channelTabWidth = channelFrameWidth - 2*channelTabHMargin;
+    Int_t channelTabHeight = 300;
+    fChannelTab[iModule] -> MoveResize(channelTabHMargin, 45, channelTabWidth, channelTabHeight);
+    fFADC[iModule] -> AddFrame(fChannelFrame[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
-  fTextDSM = new TGLabel(fCh11, "Data saving mode");
-  fTextDSM -> Move(10, 10);
-  fTextIP = new TGLabel(fCh11, "Input polarity");
-  fTextIP -> Move(10, 30);
-  fTextID = new TGLabel(fCh11, "Input delay (0 ~ 40900) (ns)");
-  fTextID -> Move(10, 50);
-  fTextAO = new TGLabel(fCh11, "ADC Offset (0 ~ 4095) (ns)");
-  fTextAO -> Move(10, 70);
-  fTextThres = new TGLabel(fCh11, "Threshold (0 ~ 1023)");
-  fTextThres -> Move(10, 90);
-  fTextRL = new TGLabel(fCh11, "Recording length (us)");
-  fTextRL -> Move(10, 110);
-  // ======== End of Channel Tab ====================================================
-  // ====== End of Channel Setting Frame ==========================================
-  // ==== End of Module 1 =========================================================
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++ ) {
+      fTextDSM = new TGLabel(fCh[iModule][iChannel], "Data saving mode");
+      fTextDSM -> Move(10, 10);
+      fTextIP = new TGLabel(fCh[iModule][iChannel], "Input polarity");
+      fTextIP -> Move(10, 30);
+      fTextID = new TGLabel(fCh[iModule][iChannel], "Input delay (0 ~ 40900) (ns)");
+      fTextID -> Move(10, 50);
+      fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC Offset (0 ~ 4095) (ns)");
+      fTextAO -> Move(10, 70);
+      fTextThres = new TGLabel(fCh[iModule][iChannel], "Threshold (0 ~ 1023)");
+      fTextThres -> Move(10, 90);
+      fTextRL = new TGLabel(fCh[iModule][iChannel], "Recording length (us)");
+      fTextRL -> Move(10, 110);
+    }
+    // ======== End of Channel Tab ====================================================
+    // ====== End of Channel Setting Frame ==========================================
+  }
+  // ==== End of Modules  =========================================================
 
+/*
   // ==== Start of Module 2 =======================================================
   fTextAddress = new TGLabel(fFADC2, "Address:");
   fTextAddress -> Move(10, 10);
@@ -169,6 +171,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   // ====== End of Channel Setting Frame ==========================================
   // ==== End of Module 1 =========================================================
   // ==== End of Module 2 =========================================================
+  */
 
   // == End of Module Frame =======================================================
 
@@ -200,7 +203,7 @@ void FADC400::SetAddress1(Int_t value)
     cout << "==============================" << endl;
   }
 
-  fValueAddress1 = value;
+  fValueAddress[0] = value;
 }
 
 void FADC400::SetActive1(Bool_t value)
@@ -211,7 +214,7 @@ void FADC400::SetActive1(Bool_t value)
     cout << "============================" << endl;
   }
 
-  fIsActive1 = value;
+  fIsActive[0] = value;
 }
 
 void FADC400::SetSameChannelSetting1(Bool_t value)
@@ -222,7 +225,7 @@ void FADC400::SetSameChannelSetting1(Bool_t value)
     cout << "================================" << endl;
   }
 
-  fUseSameChannelSetting1 = value;
+  fUseSameChannelSetting[0] = value;
 }
 
 void FADC400::SetAddress2(Int_t value)
@@ -233,7 +236,7 @@ void FADC400::SetAddress2(Int_t value)
     cout << "======================" << endl;
   }
 
-  fValueAddress2 = value;
+  fValueAddress[1] = value;
 }
 
 void FADC400::SetActive2(Bool_t value)
@@ -244,7 +247,7 @@ void FADC400::SetActive2(Bool_t value)
     cout << "============================" << endl;
   }
 
-  fIsActive2 = value;
+  fIsActive[1] = value;
 }
 
 void FADC400::SetSameChannelSetting2(Bool_t value)
@@ -255,7 +258,7 @@ void FADC400::SetSameChannelSetting2(Bool_t value)
     cout << "================================" << endl;
   }
 
-  fUseSameChannelSetting2 = value;
+  fUseSameChannelSetting[1] = value;
 }
 
 Int_t main(int argc, char **argv)

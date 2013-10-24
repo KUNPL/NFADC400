@@ -44,11 +44,14 @@ class FADC400 : public TGMainFrame
     Bool_t fUseSameModuleSetting;
 
     TGTab *fModuleTab;
-    TGCompositeFrame *fFADC1;
-    TGCompositeFrame *fFADC2;
+    TGCompositeFrame *fFADC[2];
 
-    // Variables used in common to two modules
     TGLabel *fTextAddress;
+
+    TGComboBox *fCBAddress[2];
+    Int_t fValueAddress[2];
+    TGButton *fActive[2];
+    Bool_t fIsActive[2];
 
     TGLabel *fTextDSM;
     TGLabel *fTextIP;
@@ -57,38 +60,12 @@ class FADC400 : public TGMainFrame
     TGLabel *fTextThres;
     TGLabel *fTextRL;
 
-    // Module 1
-    TGComboBox *fCBAddress1;
-    Int_t fValueAddress1;
-    TGButton *fActive1;
-    Bool_t fIsActive1;
+    TGGroupFrame *fChannelFrame[2];
+    TGButton *fSameChannelSettingButton[2];
+    Bool_t fUseSameChannelSetting[2];
 
-    TGGroupFrame *fChannelFrame1;
-    TGButton *fSameChannelSettingButton1;
-    Bool_t fUseSameChannelSetting1;
-
-    TGTab *fChannelTab1;
-    TGCompositeFrame *fCh11;
-    TGCompositeFrame *fCh12;
-    TGCompositeFrame *fCh13;
-    TGCompositeFrame *fCh14;
-
-    // Module 2
-    TGComboBox *fCBAddress2;
-    Int_t fValueAddress2;
-    TGButton *fActive2;
-    Bool_t fIsActive2;
-
-    TGGroupFrame *fChannelFrame2;
-    TGButton *fSameChannelSettingButton2;
-    Bool_t fUseSameChannelSetting2;
-
-    TGTab *fChannelTab2;
-    TGCompositeFrame *fCh21;
-    TGCompositeFrame *fCh22;
-    TGCompositeFrame *fCh23;
-    TGCompositeFrame *fCh24;
-
+    TGTab *fChannelTab[2];
+    TGCompositeFrame *fCh[2][4];
 
   ClassDef(FADC400, 1);
 };
