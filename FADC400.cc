@@ -20,6 +20,8 @@ ClassImp(FADC400);
 FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 :TGMainFrame(window, width, height, kMainFrame)
 {
+  Initialize();
+
 	FILE *fp = fopen("DEBUG", "r");
 	if (fp) {
 		fclose(fp);
@@ -38,7 +40,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   Int_t moduleFrameHMargin = 5;
   Int_t moduleFrameVMargin = 5;
   Int_t moduleFrameWidth = width - 2*moduleFrameHMargin;
-  Int_t moduleFrameHeight = height - 2*moduleFrameVMargin;
+  Int_t moduleFrameHeight = 800;
   fModuleFrame -> MoveResize(moduleFrameHMargin, moduleFrameVMargin, moduleFrameWidth, moduleFrameHeight);
 
   fSameModuleSettingButton = new TGCheckButton(fModuleFrame, "Use the same setting for all modules.");
@@ -54,7 +56,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fModuleFrame -> AddFrame(fModuleTab, new TGLayoutHints(kLHintsLeft|kLHintsTop));
   Int_t moduleTabHMargin = 10;
   Int_t moduleTabWidth = moduleFrameWidth - 2*moduleTabHMargin;
-  Int_t moduleTabHeight = moduleFrameHeight - 90;
+  Int_t moduleTabHeight = moduleFrameHeight - 65;
   fModuleTab -> MoveResize(moduleTabHMargin, 45, moduleTabWidth, moduleTabHeight);
   AddFrame(fModuleFrame, new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
@@ -81,10 +83,9 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fChannelFrame[iModule] -> SetLayoutBroken(kTRUE);
 
     Int_t channelFrameHMargin = 10;
-    Int_t channelFrameVMargin = 10;
     Int_t channelFrameWidth = moduleTabWidth - 2.5*moduleTabHMargin;
-    Int_t channelFrameHeight = 400;
-    fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 45, channelFrameWidth, channelFrameHeight);
+    Int_t channelFrameHeight = 247;
+    fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 35, channelFrameWidth, channelFrameHeight);
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule]);
 
     // ======== Start of Channel Tab ==================================================
@@ -94,30 +95,42 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     fChannelTab[iModule] = new TGTab(fChannelFrame[iModule]);
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
-      fCh[iModule][iChannel] = fChannelTab[iModule] -> AddTab(Form("Channel %d", iChannel));
+      fCh[iModule][iChannel] = fChannelTab[iModule] -> AddTab(Form("Channel %d", iChannel + 1));
       fCh[iModule][iChannel] -> SetLayoutBroken(kTRUE);
     }
 
     fChannelFrame[iModule] -> AddFrame(fChannelTab[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
     Int_t channelTabHMargin = 10;
     Int_t channelTabWidth = channelFrameWidth - 2*channelTabHMargin;
-    Int_t channelTabHeight = 300;
+    Int_t channelTabHeight = channelFrameHeight - 62;
     fChannelTab[iModule] -> MoveResize(channelTabHMargin, 45, channelTabWidth, channelTabHeight);
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
     for (Int_t iChannel = 0; iChannel < 4; iChannel++ ) {
       fTextDSM = new TGLabel(fCh[iModule][iChannel], "Data saving mode");
       fTextDSM -> Move(10, 10);
+      fDSMGroup = new TGHButtonGroup(fCh[iModule][iChannel]);
+      fDSMGroup -> SetLayoutBroken(kTRUE);
+      fDSM[iModule][iChannel][0] = new TGRadioButton(fDSMGroup, "Raw", iModule*100 + iChannel*10);
+      fDSM[iModule][iChannel][0] -> MoveResize(0, 0, 50, 11);
+      fDSM[iModule][iChannel][0] -> SetState(kButtonDown);
+      fDSM[iModule][iChannel][1] = new TGRadioButton(fDSMGroup, "Smooth", iModule*100 + iChannel*10 + 1);
+      fDSM[iModule][iChannel][1] -> MoveResize(60, 0, 60, 11);
+      fDSMGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetDSM(Int_t)");
+      fDSMGroup -> MoveResize(200, 11, 120, 11);
+      fDSMGroup -> Show();
+
+      fCh[iModule][iChannel] -> AddFrame(fDSMGroup);
       fTextIP = new TGLabel(fCh[iModule][iChannel], "Input polarity");
-      fTextIP -> Move(10, 30);
+      fTextIP -> Move(10, 35);
       fTextID = new TGLabel(fCh[iModule][iChannel], "Input delay (0 ~ 40900) (ns)");
-      fTextID -> Move(10, 50);
+      fTextID -> Move(10, 60);
       fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC Offset (0 ~ 4095) (ns)");
-      fTextAO -> Move(10, 70);
+      fTextAO -> Move(10, 85);
       fTextThres = new TGLabel(fCh[iModule][iChannel], "Threshold (0 ~ 1023)");
-      fTextThres -> Move(10, 90);
+      fTextThres -> Move(10, 110);
       fTextRL = new TGLabel(fCh[iModule][iChannel], "Recording length (us)");
-      fTextRL -> Move(10, 110);
+      fTextRL -> Move(10, 135);
     }
     // ======== End of Channel Tab ====================================================
     // ====== End of Channel Setting Frame ==========================================
@@ -132,6 +145,11 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 FADC400::~FADC400()
 {
   Cleanup();
+}
+
+void FADC400::Initialize()
+{
+  // Initialize internal variables
 }
 
 void FADC400::SetSameModuleSetting(Bool_t value)
@@ -151,9 +169,10 @@ void FADC400::SetAddress(Int_t value)
   Int_t module = object -> WidgetId();
 
   if (fIsDebug) {
-    cout << "==============================" << endl;
-    cout << " SetAddress" << module << " is " << value << "!" << endl;
-    cout << "==============================" << endl;
+    cout << "======================================" << endl;
+    cout << " SetAddress module:" << module + 1;
+    cout << " is " << value << "!" << endl;
+    cout << "======================================" << endl;
   }
 
   fValueAddress[module] = value;
@@ -165,9 +184,10 @@ void FADC400::SetActive(Bool_t value)
   Int_t module = object -> WidgetId();
 
   if (fIsDebug) {
-    cout << "============================" << endl;
-    cout << " SetActive" << module << " is " << ( value ? "Activated!" : "Deactivated!" ) << endl;
-    cout << "============================" << endl;
+    cout << "====================================" << endl;
+    cout << " SetActive module:" << module + 1;
+    cout << " is " << ( value ? "Activated!" : "Deactivated!" ) << endl;
+    cout << "====================================" << endl;
   }
 
   fIsActive[module] = value;
@@ -179,18 +199,36 @@ void FADC400::SetSameChannelSetting(Bool_t value)
   Int_t module = object -> WidgetId();
 
   if (fIsDebug) {
-    cout << "================================" << endl;
-    cout << " SetSameChannelSetting" << module << " is " << ( value ? "On!" : "Off!" ) << endl;
-    cout << "================================" << endl;
+    cout << "========================================" << endl;
+    cout << " SetSameChannelSetting module:" << module + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "========================================" << endl;
   }
 
   fUseSameChannelSetting[module] = value;
 }
 
+void FADC400::SetDSM(Int_t value)
+{
+  Int_t module = value/100;
+  Int_t channel = (value%100)/10;
+  Int_t mode = value%10;
+
+  if (fIsDebug) {
+    cout << "======================================" << endl;
+    cout << " SetDSM module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << ( mode ? "Smooth!" : "Raw!" ) << endl;
+    cout << "======================================" << endl;
+  }
+
+  fValueDSM[module][channel] = mode;
+}
+
 Int_t main(int argc, char **argv)
 {
 	TApplication theApp("FADC400GUI", &argc, argv);
-	new FADC400(gClient -> GetRoot(), 800, 1000);
+	new FADC400(gClient -> GetRoot(), 410, 1000);
 	theApp.Run();
 
 	return 0;

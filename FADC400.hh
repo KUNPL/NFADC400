@@ -19,6 +19,7 @@
 #include "TGButton.h"
 #include "TGLabel.h"
 #include "TGComboBox.h"
+#include "TGButtonGroup.h"
 
 class FADC400 : public TGMainFrame
 {
@@ -32,7 +33,10 @@ class FADC400 : public TGMainFrame
     void SetActive(Bool_t);
     void SetSameChannelSetting(Bool_t);
 
+    void SetDSM(Int_t i);
+
   private:
+    void Initialize();
     Bool_t fIsDebug;
 
     TGGroupFrame *fModuleFrame;
@@ -50,6 +54,10 @@ class FADC400 : public TGMainFrame
     Bool_t fIsActive[2];
 
     TGLabel *fTextDSM;
+    TGHButtonGroup *fDSMGroup;
+    TGRadioButton *fDSM[2][4][2];
+    Bool_t fValueDSM[2][4];
+
     TGLabel *fTextIP;
     TGLabel *fTextID;
     TGLabel *fTextAO;
