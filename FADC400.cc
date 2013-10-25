@@ -270,6 +270,45 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fCLTGroup -> Show();
     fTriggerFrame[iModule] -> AddFrame(fCLTGroup);
     // == End of Condition Lookup Table =========================================
+
+    // == Start of Trigger Mode Frame ===========================================
+    fTModeFrame[iModule] = new TGGroupFrame(fTriggerFrame[iModule], "Mode");
+    fTModeFrame[iModule] -> SetLayoutBroken(kTRUE);
+
+    Int_t tmodeFrameHMargin = 10;
+    Int_t tmodeFrameWidth = triggerFrameWidth - 2*tmodeFrameHMargin;
+    Int_t tmodeFrameHeight = triggerFrameHeight - 135;
+    fTModeFrame[iModule] -> MoveResize(tmodeFrameHMargin, 125, tmodeFrameWidth, tmodeFrameHeight);
+    fTriggerFrame[iModule] -> AddFrame(fTModeFrame[iModule]);
+
+    // == Start of Trigger Mode Channel Group ===================================
+    fTMTab = new TGTab(fTModeFrame[iModule]);
+    fTMCG[iModule][0] = fTMTab -> AddTab("Channel 1 & 2");
+    fTMCG[iModule][0] -> SetLayoutBroken(kTRUE);
+    fTMCG[iModule][1] = fTMTab -> AddTab("Channel 3 & 4");
+    fTMCG[iModule][1] -> SetLayoutBroken(kTRUE);
+
+    // == Start of Trigger Mode Channel Group Tab ===============================
+    fTriggerFrame[iModule] -> AddFrame(fTMTab, new TGLayoutHints(kLHintsLeft|kLHintsTop));
+    Int_t tmodeTabHMargin = 10;
+    Int_t tmodeTabWidth = tmodeFrameWidth - 2*tmodeTabHMargin;
+    Int_t tmodeTabHeight = tmodeFrameHeight - 35;
+    fTMTab -> MoveResize(tmodeTabHMargin, 20, tmodeTabWidth, tmodeTabHeight);
+    fTriggerFrame[iModule] -> AddFrame(fTMTab);
+
+    for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
+      Int_t widgetID = iModule*100 + iCGroup;
+
+      fTMCount[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Count", widgetID);
+      fTMCount[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeCount(Bool_t)");
+      fTMCount[iModule][iCGroup] -> Move(10, 5);
+      fTMWidth[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Width", widgetID);
+      fTMWidth[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeWidth(Bool_t)");
+      fTMWidth[iModule][iCGroup] -> Move(150, 5);
+    }
+    // == End of Trigger Mode Channel Group Tab =================================
+    // == End of Trigger Mode Channel Group =====================================
+    // == End of Trigger Mode Frame =============================================
     // == End of Trigger Frame ==================================================
   }
   // == End of Modules ============================================================
@@ -353,7 +392,7 @@ void FADC400::SetDSM(Int_t value)
 
   if (fIsDebug) {
     cout << "======================================" << endl;
-    cout << " SetDSM module:" << module;
+    cout << " SetDSM module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << ( mode ? "Smooth!" : "Raw!" ) << endl;
     cout << "======================================" << endl;
@@ -370,7 +409,7 @@ void FADC400::SetIP(Int_t value)
 
   if (fIsDebug) {
     cout << "==================================" << endl;
-    cout << " SetIP module:" << module;
+    cout << " SetIP module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << ( mode ? "(+)!" : "(-)!" ) << endl;
     cout << "==================================" << endl;
@@ -389,7 +428,7 @@ void FADC400::SetID(const Char_t *value)
 
   if (fIsDebug) {
     cout << "====================================" << endl;
-    cout << " SetID module:" << module;
+    cout << " SetID module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << atoi(value) << "!" << endl;
     cout << "====================================" << endl;
@@ -408,7 +447,7 @@ void FADC400::SetAO(const Char_t *value)
 
   if (fIsDebug) {
     cout << "===================================" << endl;
-    cout << " SetAO module:" << module;
+    cout << " SetAO module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << atoi(value) << "!" << endl;
     cout << "===================================" << endl;
@@ -427,7 +466,7 @@ void FADC400::SetThres(const Char_t *value)
 
   if (fIsDebug) {
     cout << "======================================" << endl;
-    cout << " SetThres module:" << module;
+    cout << " SetThres module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << atoi(value) << "!" << endl;
     cout << "======================================" << endl;
@@ -446,7 +485,7 @@ void FADC400::SetRL(Int_t value)
 
   if (fIsDebug) {
     cout << "==============================================" << endl;
-    cout << " SetRL module:" << module;
+    cout << " SetRL module:" << module + 1;
     cout << " channel:" << channel + 1;
     cout << " is " << value << " (" << 2.56*value << " us)" << endl;
     cout << "==============================================" << endl;
@@ -462,7 +501,7 @@ void FADC400::SetDT(const Char_t *value)
 
   if (fIsDebug) {
     cout << "==============================" << endl;
-    cout << " SetDT module:" << module;
+    cout << " SetDT module:" << module + 1;
     cout << " is " << atoi(value) << "!" << endl;
     cout << "==============================" << endl;
   }
@@ -477,7 +516,7 @@ void FADC400::SetDTApplied(Int_t value)
 
   if (fIsDebug) {
     cout << "=============================================" << endl;
-    cout << " SetDTApplied module:" << module;
+    cout << " SetDTApplied module:" << module + 1;
     cout << " is ";
     if (mode == 0)
       cout << "for channel 1 & 2!";
@@ -499,7 +538,7 @@ void FADC400::SetCW(const Char_t *value)
 
   if (fIsDebug) {
     cout << "==========================" << endl;
-    cout << " SetCW module:" << module;
+    cout << " SetCW module:" << module + 1;
     cout << " is " << atoi(value) << "!" << endl;
     cout << "==========================" << endl;
   }
@@ -514,7 +553,7 @@ void FADC400::SetCWApplied(Int_t value)
 
   if (fIsDebug) {
     cout << "=============================================" << endl;
-    cout << " SetCWApplied module:" << module;
+    cout << " SetCWApplied module:" << module + 1;
     cout << " is ";
     if (mode == 0)
       cout << "for channel 1 & 2!";
@@ -536,12 +575,50 @@ void FADC400::SetCLT(Int_t value)
 
   if (fIsDebug) {
     cout << "=========================" << endl;
-    cout << " SetCLT module:" << module;
+    cout << " SetCLT module:" << module + 1;
     cout << " is " << ( mode ? "OR!" : "AND!" ) << endl;
     cout << "=========================" << endl;
   }
 
   fValueCLT[module] = mode;
+}
+
+void FADC400::SetTriggerModeCount(Bool_t value)
+{
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channelGroup = widgetID%10;
+
+  if (fIsDebug) {
+    cout << "=====================================================" << endl;
+    cout << " SetTriggerModeCount module:" << module + 1;
+    cout << " channelGroup:" << channelGroup + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "=====================================================" << endl;
+  }
+
+  fValueTMCount[module][channelGroup] = value;
+}
+
+void FADC400::SetTriggerModeWidth(Bool_t value)
+{
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channelGroup = widgetID%10;
+
+  if (fIsDebug) {
+    cout << "=====================================================" << endl;
+    cout << " SetTriggerModeWidth module:" << module + 1;
+    cout << " channelGroup:" << channelGroup + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "=====================================================" << endl;
+  }
+
+  fValueTMWidth[module][channelGroup] = value;
 }
 
 Int_t main(int argc, char **argv)
