@@ -41,6 +41,13 @@ class FADC400 : public TGMainFrame
     void SetThres(const Char_t *);
     void SetRL(Int_t);
 
+    void SetDT(const Char_t *);
+    void SetDTApplied(Int_t);
+    void SetCW(const Char_t *);
+    void SetCWApplied(Int_t);
+
+    void SetCLT(Int_t);
+
   private:
     void Initialize();
     Bool_t fIsDebug;
@@ -51,6 +58,15 @@ class FADC400 : public TGMainFrame
     Bool_t fUseSameModuleSetting;
     TGTab *fModuleTab;
     TGCompositeFrame *fFADC[2];
+
+    // Channel setting frame
+    TGGroupFrame *fChannelFrame[2];
+    TGButton *fSameChannelSettingButton[2];
+    Bool_t fUseSameChannelSetting[2];
+
+    // Channel Tab
+    TGTab *fChannelTab[2];
+    TGCompositeFrame *fCh[2][4];
 
     // Channel
     TGLabel *fTextAddress;
@@ -91,12 +107,32 @@ class FADC400 : public TGMainFrame
     TGComboBox *fRL[2][4];
     Int_t fValueRL[2][4];
 
-    TGGroupFrame *fChannelFrame[2];
-    TGButton *fSameChannelSettingButton[2];
-    Bool_t fUseSameChannelSetting[2];
+    // Trigger Frame
+    TGGroupFrame *fTriggerFrame[2];
 
-    TGTab *fChannelTab[2];
-    TGCompositeFrame *fCh[2][4];
+    TGLabel *fTextFor;
+
+    // Deadtime
+    TGLabel *fTextDT;
+    TGNumberEntryField *fDT[2];
+    Int_t fValueDT[2];
+    TGHButtonGroup *fDTAppliedGroup;
+    TGRadioButton *fDTApplied[2][3];
+    Int_t fValueDTApplied[2];
+
+    // Coincidence Width
+    TGLabel *fTextCW;
+    TGNumberEntryField *fCW[2];
+    Int_t fValueCW[2];
+    TGHButtonGroup *fCWAppliedGroup;
+    TGRadioButton *fCWApplied[2][3];
+    Int_t fValueCWApplied[2];
+
+    // Contidion Lookup Table
+    TGLabel *fTextCLT;
+    TGHButtonGroup *fCLTGroup;
+    TGRadioButton *fCLT[2][2];
+    Int_t fValueCLT[2];
 
   ClassDef(FADC400, 1);
 };
