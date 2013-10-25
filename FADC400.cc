@@ -8,6 +8,11 @@
 //                                 //
 /////////////////////////////////////
 
+#include <cmath>
+#include <cstdlib>
+
+using std::atoi;
+
 #include "TApplication.h"
 #include "Riostream.h"
 #include "TSystem.h"
@@ -60,7 +65,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fModuleTab -> MoveResize(moduleTabHMargin, 45, moduleTabWidth, moduleTabHeight);
   AddFrame(fModuleFrame, new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
-  // ==== Start of Modules  =======================================================
+  // == Start of Modules  =======================================================
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     fTextAddress = new TGLabel(fFADC[iModule], "Address:");
     fTextAddress -> Move(10, 10);
@@ -78,7 +83,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fActive[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetActive(Bool_t)");
     fActive[iModule] -> Move(140, 10);
 
-    // ====== Start of Channel Setting Frame ========================================
+    // == Start of Channel Setting Frame ========================================
     fChannelFrame[iModule] = new TGGroupFrame(fFADC[iModule], "Channel Setting");
     fChannelFrame[iModule] -> SetLayoutBroken(kTRUE);
 
@@ -88,7 +93,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 35, channelFrameWidth, channelFrameHeight);
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule]);
 
-    // ======== Start of Channel Tab ==================================================
+    // == Start of Channel Tab ==================================================
     fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channel.", iModule);
     fSameChannelSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameChannelSetting(Bool_t)");
     fSameChannelSettingButton[iModule] -> Move(10, 20);
@@ -107,30 +112,87 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
 
     for (Int_t iChannel = 0; iChannel < 4; iChannel++ ) {
+      Int_t widgetID = iModule*100 + iChannel*10;
+
+      // == Start of Data saving mode =============================================
       fTextDSM = new TGLabel(fCh[iModule][iChannel], "Data saving mode");
       fTextDSM -> Move(10, 10);
       fDSMGroup = new TGHButtonGroup(fCh[iModule][iChannel]);
       fDSMGroup -> SetLayoutBroken(kTRUE);
-      fDSM[iModule][iChannel][0] = new TGRadioButton(fDSMGroup, "Raw", iModule*100 + iChannel*10);
+      fDSM[iModule][iChannel][0] = new TGRadioButton(fDSMGroup, "Raw", widgetID);
       fDSM[iModule][iChannel][0] -> MoveResize(0, 0, 50, 11);
       fDSM[iModule][iChannel][0] -> SetState(kButtonDown);
-      fDSM[iModule][iChannel][1] = new TGRadioButton(fDSMGroup, "Smooth", iModule*100 + iChannel*10 + 1);
+      fDSM[iModule][iChannel][1] = new TGRadioButton(fDSMGroup, "Smooth", widgetID + 1);
       fDSM[iModule][iChannel][1] -> MoveResize(60, 0, 60, 11);
       fDSMGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetDSM(Int_t)");
-      fDSMGroup -> MoveResize(200, 11, 120, 11);
+      fDSMGroup -> MoveResize(200, 13, 120, 11);
       fDSMGroup -> Show();
-
       fCh[iModule][iChannel] -> AddFrame(fDSMGroup);
+      // == End of Data saving mode ===============================================
+
+      // == Start of Input polarity ===============================================
       fTextIP = new TGLabel(fCh[iModule][iChannel], "Input polarity");
       fTextIP -> Move(10, 35);
+      fIPGroup = new TGHButtonGroup(fCh[iModule][iChannel]);
+      fIPGroup -> SetLayoutBroken(kTRUE);
+      fIP[iModule][iChannel][0] = new TGRadioButton(fIPGroup, "(-)", widgetID);
+      fIP[iModule][iChannel][0] -> MoveResize(0, 0, 50, 11);
+      fIP[iModule][iChannel][0] -> SetState(kButtonDown);
+      fIP[iModule][iChannel][1] = new TGRadioButton(fIPGroup, "(+)", widgetID + 1);
+      fIP[iModule][iChannel][1] -> MoveResize(60, 0, 50, 11);
+      fIPGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetIP(Int_t)");
+      fIPGroup -> MoveResize(200, 38, 120, 11);
+      fIPGroup -> Show();
+      fCh[iModule][iChannel] -> AddFrame(fIPGroup);
+      // == End of Input polarity =================================================
+
+      // == Start of Input delay ==================================================
       fTextID = new TGLabel(fCh[iModule][iChannel], "Input delay (0 ~ 40900) (ns)");
       fTextID -> Move(10, 60);
+      fID[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 40900);
+      fID[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetID(const Char_t *)");
+      fID[iModule][iChannel] -> MoveResize(241, 60, 80, 18);
+      fCh[iModule][iChannel] -> AddFrame(fID[iModule][iChannel]);
+      // == End of Input delay ====================================================
+
+      // == Start of ADC Offset ===================================================
       fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC Offset (0 ~ 4095) (ns)");
       fTextAO -> Move(10, 85);
+      fAO[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 4095);
+      fAO[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetAO(const Char_t *)");
+      fAO[iModule][iChannel] -> MoveResize(241, 85, 80, 18);
+      fCh[iModule][iChannel] -> AddFrame(fAO[iModule][iChannel]);
+      // == End of ADC Offset =====================================================
+
+      // == Start of Threshold ====================================================
       fTextThres = new TGLabel(fCh[iModule][iChannel], "Threshold (0 ~ 1023)");
       fTextThres -> Move(10, 110);
+      fThres[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 1023);
+      fThres[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetThres(const Char_t *)");
+      fThres[iModule][iChannel] -> MoveResize(241, 110, 80, 18);
+      fCh[iModule][iChannel] -> AddFrame(fThres[iModule][iChannel]);
+      // == End of Threshold ======================================================
+
+      // == Start of Recording length =============================================
       fTextRL = new TGLabel(fCh[iModule][iChannel], "Recording length (us)");
       fTextRL -> Move(10, 135);
+      fRL[iModule][iChannel] = new TGComboBox(fCh[iModule][iChannel], widgetID);
+      for (Int_t iRL = 0; iRL < 10; iRL++)
+        fRL[iModule][iChannel] -> AddEntry(Form("%.2f", 2.56*pow(2., iRL)), pow(2., iRL));
+      fRL[iModule][iChannel] -> Select(1);
+      fRL[iModule][iChannel] -> Connect("Selected(Int_t)", "FADC400", this, "SetRL(Int_t)");
+      fRL[iModule][iChannel] -> MoveResize(241, 135, 80, 18);
+      fCh[iModule][iChannel] -> AddFrame(fRL[iModule][iChannel]);
+      // == End of Recording length ===============================================
+
+      // == Start of Tab and Return pressed on TextEntries ========================
+      fID[iModule][iChannel] -> Connect("TabPressed()", "TGNumberEntryField", fAO[iModule][iChannel], "SetFocus()");
+      fID[iModule][iChannel] -> Connect("ReturnPressed()", "TGNumberEntryField", fAO[iModule][iChannel], "SetFocus()");
+      fAO[iModule][iChannel] -> Connect("TabPressed()", "TGNumberEntryField", fThres[iModule][iChannel], "SetFocus()");
+      fAO[iModule][iChannel] -> Connect("ReturnPressed()", "TGNumberEntryField", fThres[iModule][iChannel], "SetFocus()");
+      fThres[iModule][iChannel] -> Connect("TabPressed()", "TGNumberEntryField", fID[iModule][iChannel], "SetFocus()");
+      fThres[iModule][iChannel] -> Connect("ReturnPressed()", "TGNumberEntryField", fID[iModule][iChannel], "SetFocus()");
+      // == End of Tab and Return pressed on TextEntries ==========================
     }
     // ======== End of Channel Tab ====================================================
     // ====== End of Channel Setting Frame ==========================================
@@ -223,6 +285,99 @@ void FADC400::SetDSM(Int_t value)
   }
 
   fValueDSM[module][channel] = mode;
+}
+
+void FADC400::SetIP(Int_t value)
+{
+  Int_t module = value/100;
+  Int_t channel = (value%100)/10;
+  Int_t mode = value%10;
+
+  if (fIsDebug) {
+    cout << "==================================" << endl;
+    cout << " SetIP module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << ( mode ? "(+)!" : "(-)!" ) << endl;
+    cout << "==================================" << endl;
+  }
+
+  fValueIP[module][channel] = mode;
+}
+
+void FADC400::SetID(const Char_t *value)
+{
+  TGNumberEntryField *object = (TGNumberEntryField *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "====================================" << endl;
+    cout << " SetID module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << atoi(value) << "!" << endl;
+    cout << "====================================" << endl;
+  }
+
+  fValueID[module][channel] = atoi(value);
+}
+
+void FADC400::SetAO(const Char_t *value)
+{
+  TGNumberEntryField *object = (TGNumberEntryField *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "===================================" << endl;
+    cout << " SetAO module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << atoi(value) << "!" << endl;
+    cout << "===================================" << endl;
+  }
+
+  fValueAO[module][channel] = atoi(value);
+}
+
+void FADC400::SetThres(const Char_t *value)
+{
+  TGNumberEntryField *object = (TGNumberEntryField *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "======================================" << endl;
+    cout << " SetThres module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << atoi(value) << "!" << endl;
+    cout << "======================================" << endl;
+  }
+
+  fValueThres[module][channel] = atoi(value);
+}
+
+void FADC400::SetRL(Int_t value)
+{
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "==============================================" << endl;
+    cout << " SetRL module:" << module;
+    cout << " channel:" << channel + 1;
+    cout << " is " << value << " (" << 2.56*value << " us)" << endl;
+    cout << "==============================================" << endl;
+  }
+
+  fValueRL[module][channel] = value;
 }
 
 Int_t main(int argc, char **argv)
