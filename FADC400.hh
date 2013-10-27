@@ -48,6 +48,7 @@ class FADC400 : public TGMainFrame
 
     void SetCLT(Int_t);
 
+    void SetSameCGroupSetting(Bool_t);
     void SetTriggerModeCount(Bool_t);
     void SetTMCOption(Int_t);
     void SetTriggerModeWidth(Bool_t);
@@ -59,14 +60,14 @@ class FADC400 : public TGMainFrame
 
     // Module
     TGGroupFrame *fModuleFrame;
-    TGButton *fSameModuleSettingButton;
+    TGCheckButton *fSameModuleSettingButton;
     Bool_t fUseSameModuleSetting;
     TGTab *fModuleTab;
     TGCompositeFrame *fFADC[2];
 
     // Channel setting frame
     TGGroupFrame *fChannelFrame[2];
-    TGButton *fSameChannelSettingButton[2];
+    TGCheckButton *fSameChannelSettingButton[2];
     Bool_t fUseSameChannelSetting[2];
 
     // Channel Tab
@@ -142,8 +143,11 @@ class FADC400 : public TGMainFrame
     // Trigger Mode Frame
     TGGroupFrame *fTModeFrame[2];
 
-    TGTab *fTMTab;
+    TGTab *fTMTab[2];
     TGCompositeFrame *fTMCG[2][2];
+
+    TGCheckButton *fSameCGroupSettingButton[2];
+    Bool_t fUseSameCGroupSetting[2];
 
     // Trigger Mode Channel Group Tab
     TGCheckButton *fTMCount[2][2];

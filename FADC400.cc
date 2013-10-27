@@ -209,13 +209,13 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     // == Start of Deadtime =====================================================
     fTextDT = new TGLabel(fTriggerFrame[iModule], "Deadtime (0 ~ 104448000) (ns)");
-    fTextDT -> Move(10, 25);
+    fTextDT -> Move(10, 20);
     fDT[iModule] = new TGNumberEntryField(fTriggerFrame[iModule], iModule, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 104448000);
     fDT[iModule] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetDT(const Char_t *)");
-    fDT[iModule] -> MoveResize(250, 25, 80, 18);
+    fDT[iModule] -> MoveResize(250, 20, 80, 18);
     fTriggerFrame[iModule] -> AddFrame(fDT[iModule]);
     fTextFor = new TGLabel(fTriggerFrame[iModule], "for");
-    fTextFor -> Move(30, 43);
+    fTextFor -> Move(30, 38);
     fDTAppliedGroup = new TGHButtonGroup(fTriggerFrame[iModule]);
     fDTAppliedGroup -> SetLayoutBroken(kTRUE);
     fDTApplied[iModule][0] = new TGRadioButton(fDTAppliedGroup, "Ch 1&&2", iModule*100);
@@ -226,20 +226,20 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fDTApplied[iModule][2] = new TGRadioButton(fDTAppliedGroup, "All Channels", iModule*100 + 2);
     fDTApplied[iModule][2] -> MoveResize(170, 0, 95, 11);
     fDTAppliedGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetDTApplied(Int_t)");
-    fDTAppliedGroup -> MoveResize(55, 45, 270, 11);
+    fDTAppliedGroup -> MoveResize(55, 40, 270, 11);
     fDTAppliedGroup -> Show();
     fTriggerFrame[iModule] -> AddFrame(fDTAppliedGroup);
     // == End of Deadtime =======================================================
 
     // == Start of Coincidence width ============================================
     fTextCW = new TGLabel(fTriggerFrame[iModule], "Coincidence width (160 ~ 40800) (ns)");
-    fTextCW -> Move(10, 65);
+    fTextCW -> Move(10, 60);
     fCW[iModule] = new TGNumberEntryField(fTriggerFrame[iModule], iModule, 160, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 160, 40800);
     fCW[iModule] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetCW(const Char_t *)");
-    fCW[iModule] -> MoveResize(250, 65, 80, 18);
+    fCW[iModule] -> MoveResize(250, 60, 80, 18);
     fTriggerFrame[iModule] -> AddFrame(fCW[iModule]);
     fTextFor = new TGLabel(fTriggerFrame[iModule], "for");
-    fTextFor -> Move(30, 83);
+    fTextFor -> Move(30, 78);
     fCWAppliedGroup = new TGHButtonGroup(fTriggerFrame[iModule]);
     fCWAppliedGroup -> SetLayoutBroken(kTRUE);
     fCWApplied[iModule][0] = new TGRadioButton(fCWAppliedGroup, "Ch 1&&2", iModule*100);
@@ -250,14 +250,21 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fCWApplied[iModule][2] = new TGRadioButton(fCWAppliedGroup, "All Channels", iModule*100 + 2);
     fCWApplied[iModule][2] -> MoveResize(170, 0, 95, 11);
     fCWAppliedGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetCWApplied(Int_t)");
-    fCWAppliedGroup -> MoveResize(55, 85, 270, 11);
+    fCWAppliedGroup -> MoveResize(55, 80, 270, 11);
     fCWAppliedGroup -> Show();
     fTriggerFrame[iModule] -> AddFrame(fCWAppliedGroup);
     // == End of Deadtime =======================================================
 
+    // == Start of Tab and Return pressed on TextEntries ========================
+    fDT[iModule] -> Connect("TabPressed()", "TGNumberEntryField", fCW[iModule], "SetFocus()");
+    fDT[iModule] -> Connect("ReturnPressed()", "TGNumberEntryField", fCW[iModule], "SetFocus()");
+    fCW[iModule] -> Connect("TabPressed()", "TGNumberEntryField", fDT[iModule], "SetFocus()");
+    fCW[iModule] -> Connect("ReturnPressed()", "TGNumberEntryField", fDT[iModule], "SetFocus()");
+    // == End of Tab and Return pressed on TextEntries ==========================
+
     // == Start of Condition Lookup Table =======================================
     fTextCLT = new TGLabel(fTriggerFrame[iModule], "Condition lookup table");
-    fTextCLT -> Move(10, 105);
+    fTextCLT -> Move(10, 100);
     fCLTGroup = new TGHButtonGroup(fTriggerFrame[iModule]);
     fCLTGroup -> SetLayoutBroken(kTRUE);
     fCLT[iModule][0] = new TGRadioButton(fCLTGroup, "AND", iModule*100);
@@ -266,7 +273,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fCLT[iModule][1] = new TGRadioButton(fCLTGroup, "OR", iModule*100 + 1);
     fCLT[iModule][1] -> MoveResize(70, 0, 40, 11);
     fCLTGroup -> Connect("Clicked(Int_t)", "FADC400", this, "SetCLT(Int_t)");
-    fCLTGroup -> MoveResize(222, 105, 110, 11);
+    fCLTGroup -> MoveResize(222, 102, 110, 11);
     fCLTGroup -> Show();
     fTriggerFrame[iModule] -> AddFrame(fCLTGroup);
     // == End of Condition Lookup Table =========================================
@@ -277,66 +284,76 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     Int_t tmodeFrameHMargin = 10;
     Int_t tmodeFrameWidth = triggerFrameWidth - 2*tmodeFrameHMargin;
-    Int_t tmodeFrameHeight = triggerFrameHeight - 135;
-    fTModeFrame[iModule] -> MoveResize(tmodeFrameHMargin, 125, tmodeFrameWidth, tmodeFrameHeight);
+    Int_t tmodeFrameHeight = triggerFrameHeight - 129;
+    fTModeFrame[iModule] -> MoveResize(tmodeFrameHMargin, 119, tmodeFrameWidth, tmodeFrameHeight);
     fTriggerFrame[iModule] -> AddFrame(fTModeFrame[iModule]);
 
+    fSameCGroupSettingButton[iModule] = new TGCheckButton(fTModeFrame[iModule], "Use the same setting for all channel group.", iModule);
+    fSameCGroupSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameCGroupSetting(Bool_t)");
+    fSameCGroupSettingButton[iModule] -> Move(10, 20);
+
     // == Start of Trigger Mode Channel Group ===================================
-    fTMTab = new TGTab(fTModeFrame[iModule]);
-    fTMCG[iModule][0] = fTMTab -> AddTab("Channel 1 & 2");
+    fTMTab[iModule] = new TGTab(fTModeFrame[iModule]);
+    fTMCG[iModule][0] = fTMTab[iModule] -> AddTab("Channel 1 & 2");
     fTMCG[iModule][0] -> SetLayoutBroken(kTRUE);
-    fTMCG[iModule][1] = fTMTab -> AddTab("Channel 3 & 4");
+    fTMCG[iModule][1] = fTMTab[iModule] -> AddTab("Channel 3 & 4");
     fTMCG[iModule][1] -> SetLayoutBroken(kTRUE);
 
     // == Start of Trigger Mode Channel Group Tab ===============================
-    fTriggerFrame[iModule] -> AddFrame(fTMTab, new TGLayoutHints(kLHintsLeft|kLHintsTop));
+    fTriggerFrame[iModule] -> AddFrame(fTMTab[iModule], new TGLayoutHints(kLHintsLeft|kLHintsTop));
     Int_t tmodeTabHMargin = 10;
     Int_t tmodeTabWidth = tmodeFrameWidth - 2*tmodeTabHMargin;
-    Int_t tmodeTabHeight = tmodeFrameHeight - 35;
-    fTMTab -> MoveResize(tmodeTabHMargin, 20, tmodeTabWidth, tmodeTabHeight);
-    fTriggerFrame[iModule] -> AddFrame(fTMTab);
+    Int_t tmodeTabHeight = tmodeFrameHeight - 60;
+    fTMTab[iModule] -> MoveResize(tmodeTabHMargin, 42, tmodeTabWidth, tmodeTabHeight);
+    fTriggerFrame[iModule] -> AddFrame(fTMTab[iModule]);
 
     for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
       Int_t widgetID = iModule*100 + iCGroup*10;
 
       fTMCount[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Count", widgetID);
       fTMCount[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeCount(Bool_t)");
-      fTMCount[iModule][iCGroup] -> Move(15, 10);
+      fTMCount[iModule][iCGroup] -> Move(15, 4);
 
       Int_t lowCh = pow(3., iCGroup);
       Int_t highCh = pow(2., iCGroup + 1);
       fTMCountOptionGroup[iModule][iCGroup] = new TGButtonGroup(fTMCG[iModule][iCGroup]);
       fTMCountOptionGroup[iModule][iCGroup] -> SetLayoutBroken(kTRUE);
       fTMCountOption[iModule][iCGroup][0] = new TGRadioButton(fTMCountOptionGroup[iModule][iCGroup], Form("%d + %d", lowCh, highCh), widgetID);
+      fTMCountOption[iModule][iCGroup][0] -> SetEnabled(kFALSE);
       fTMCountOption[iModule][iCGroup][0] -> Move(50, 0);
       fTMCountOption[iModule][iCGroup][1] = new TGRadioButton(fTMCountOptionGroup[iModule][iCGroup], Form("%d", lowCh), widgetID + 1);
+      fTMCountOption[iModule][iCGroup][1] -> SetEnabled(kFALSE);
       fTMCountOption[iModule][iCGroup][1] -> Move(0, 0);
-      fTMCountOption[iModule][iCGroup][1] -> SetState(kButtonDown);
       fTMCountOption[iModule][iCGroup][2] = new TGRadioButton(fTMCountOptionGroup[iModule][iCGroup], Form("%d", highCh), widgetID + 2);
+      fTMCountOption[iModule][iCGroup][2] -> SetEnabled(kFALSE);
       fTMCountOption[iModule][iCGroup][2] -> Move(0, 20);
       fTMCountOption[iModule][iCGroup][3] = new TGRadioButton(fTMCountOptionGroup[iModule][iCGroup], Form("%d OR %d", lowCh, highCh), widgetID + 3);
+      fTMCountOption[iModule][iCGroup][3] -> SetEnabled(kFALSE);
       fTMCountOption[iModule][iCGroup][3] -> Move(50, 20);
       fTMCountOptionGroup[iModule][iCGroup] -> Connect("Clicked(Int_t)", "FADC400", this, "SetTMCOption(Int_t)");
-      fTMCountOptionGroup[iModule][iCGroup] -> MoveResize(25, 30, 110, 35);
+      fTMCountOptionGroup[iModule][iCGroup] -> MoveResize(25, 21, 110, 35);
       fTMCountOptionGroup[iModule][iCGroup] -> Show();
       fTMCG[iModule][iCGroup] -> AddFrame(fTMCountOptionGroup[iModule][iCGroup]);
 
       fTMWidth[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Width", widgetID);
       fTMWidth[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeWidth(Bool_t)");
-      fTMWidth[iModule][iCGroup] -> Move(155, 10);
+      fTMWidth[iModule][iCGroup] -> Move(155, 4);
       fTMWidthOptionGroup[iModule][iCGroup] = new TGButtonGroup(fTMCG[iModule][iCGroup]);
       fTMWidthOptionGroup[iModule][iCGroup] -> SetLayoutBroken(kTRUE);
       fTMWidthOption[iModule][iCGroup][0] = new TGRadioButton(fTMWidthOptionGroup[iModule][iCGroup], Form("%d OR %d", lowCh, highCh), widgetID);
+      fTMWidthOption[iModule][iCGroup][0] -> SetEnabled(kFALSE);
       fTMWidthOption[iModule][iCGroup][0] -> Move(50, 0);
       fTMWidthOption[iModule][iCGroup][1] = new TGRadioButton(fTMWidthOptionGroup[iModule][iCGroup], Form("%d", lowCh), widgetID + 1);
+      fTMWidthOption[iModule][iCGroup][1] -> SetEnabled(kFALSE);
       fTMWidthOption[iModule][iCGroup][1] -> Move(0, 0);
-      fTMWidthOption[iModule][iCGroup][1] -> SetState(kButtonDown);
       fTMWidthOption[iModule][iCGroup][2] = new TGRadioButton(fTMWidthOptionGroup[iModule][iCGroup], Form("%d", highCh), widgetID + 2);
+      fTMWidthOption[iModule][iCGroup][2] -> SetEnabled(kFALSE);
       fTMWidthOption[iModule][iCGroup][2] -> Move(0, 20);
       fTMWidthOption[iModule][iCGroup][3] = new TGRadioButton(fTMWidthOptionGroup[iModule][iCGroup], Form("%d AND %d", lowCh, highCh), widgetID + 3);
+      fTMWidthOption[iModule][iCGroup][3] -> SetEnabled(kFALSE);
       fTMWidthOption[iModule][iCGroup][3] -> Move(50, 20);
       fTMWidthOptionGroup[iModule][iCGroup] -> Connect("Clicked(Int_t)", "FADC400", this, "SetTMWOption(Int_t)");
-      fTMWidthOptionGroup[iModule][iCGroup] -> MoveResize(175, 30, 120, 35);
+      fTMWidthOptionGroup[iModule][iCGroup] -> MoveResize(175, 21, 120, 35);
       fTMWidthOptionGroup[iModule][iCGroup] -> Show();
       fTMCG[iModule][iCGroup] -> AddFrame(fTMWidthOptionGroup[iModule][iCGroup]);
     }
@@ -369,6 +386,9 @@ void FADC400::SetSameModuleSetting(Bool_t value)
     cout << " SetSameModuleSetting is " << ( value ? "On!" : "Off!" ) << endl;
     cout << "==============================" << endl;
   }
+
+  fModuleTab -> SetEnabled(1, !value);
+  fModuleTab -> SetTab(0, kFALSE);
 
   fUseSameModuleSetting = value;
 }
@@ -414,6 +434,11 @@ void FADC400::SetSameChannelSetting(Bool_t value)
     cout << " is " << ( value ? "On!" : "Off!" ) << endl;
     cout << "========================================" << endl;
   }
+
+  fChannelTab[module] -> SetEnabled(1, !value);
+  fChannelTab[module] -> SetEnabled(2, !value);
+  fChannelTab[module] -> SetEnabled(3, !value);
+  fChannelTab[module] -> SetTab(0, kFALSE);
 
   fUseSameChannelSetting[module] = value;
 }
@@ -617,6 +642,24 @@ void FADC400::SetCLT(Int_t value)
   fValueCLT[module] = mode;
 }
 
+void FADC400::SetSameCGroupSetting(Bool_t value)
+{
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t module = object -> WidgetId();
+
+  if (fIsDebug) {
+    cout << "========================================" << endl;
+    cout << " SetSameCGroupSetting module: " << module + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "========================================" << endl;
+  }
+
+  fTMTab[module] -> SetEnabled(1, !value);
+  fTMTab[module] -> SetTab(0, kFALSE);
+
+  fUseSameCGroupSetting[module] = value;
+}
+
 void FADC400::SetTriggerModeCount(Bool_t value)
 {
   TGCheckButton *object = (TGCheckButton *) gTQSender;
@@ -632,6 +675,12 @@ void FADC400::SetTriggerModeCount(Bool_t value)
     cout << " is " << ( value ? "On!" : "Off!" ) << endl;
     cout << "=====================================================" << endl;
   }
+
+  for (Int_t iOption = 0; iOption < 4; iOption++)
+    fTMCountOption[module][channelGroup][iOption] -> SetEnabled(value);
+
+  if (value)
+    fTMCountOption[module][channelGroup][1] -> SetOn(kTRUE, kTRUE);
 
   fValueTMCount[module][channelGroup] = value;
 }
@@ -680,6 +729,12 @@ void FADC400::SetTriggerModeWidth(Bool_t value)
     cout << "=====================================================" << endl;
   }
 
+  for (Int_t iOption = 0; iOption < 4; iOption++)
+    fTMWidthOption[module][channelGroup][iOption] -> SetEnabled(value);
+
+  if (value)
+    fTMWidthOption[module][channelGroup][1] -> SetOn(kTRUE, kTRUE);
+
   fValueTMWidth[module][channelGroup] = value;
 }
 
@@ -714,7 +769,7 @@ void FADC400::SetTMWOption(Int_t value)
 Int_t main(int argc, char **argv)
 {
 	TApplication theApp("FADC400GUI", &argc, argv);
-	new FADC400(gClient -> GetRoot(), 768, 1000);
+	new FADC400(gClient -> GetRoot(), 768, 450);
 	theApp.Run();
 
 	return 0;
