@@ -49,7 +49,9 @@ class FADC400 : public TGMainFrame
     void SetCLT(Int_t);
 
     void SetTriggerModeCount(Bool_t);
+    void SetTMCOption(Int_t);
     void SetTriggerModeWidth(Bool_t);
+    void SetTMWOption(Int_t);
 
   private:
     void Initialize();
@@ -146,9 +148,16 @@ class FADC400 : public TGMainFrame
     // Trigger Mode Channel Group Tab
     TGCheckButton *fTMCount[2][2];
     Bool_t fValueTMCount[2][2];
+    TGButtonGroup *fTMCountOptionGroup[2][2];
+    TGRadioButton *fTMCountOption[2][2][4];
+    Int_t fValueTMCountOption[2][2];
 
     TGCheckButton *fTMWidth[2][2];
     Bool_t fValueTMWidth[2][2];
+    TGButtonGroup *fTMWidthOptionGroup[2][2];
+    TGRadioButton *fTMWidthOption[2][2][4];
+    Int_t fValueTMWidthOption[2][2];
+
 
   ClassDef(FADC400, 1);
 };
