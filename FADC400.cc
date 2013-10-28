@@ -10,13 +10,21 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
 
 using std::atoi;
+using std::ios;
+using std::ifstream;
+using std::ofstream;
 
 #include "TApplication.h"
 #include "Riostream.h"
 #include "TSystem.h"
 #include "TGClient.h"
+
+#include "TGFileDialog.h"
+#include "TObjArray.h"
+#include "TObjString.h"
 
 #include "FADC400.hh"
 
@@ -365,6 +373,16 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   // == End of Modules ============================================================
   // == End of Module Frame =======================================================
 
+  // == Start of Buttons ==========================================================
+  fLoad = new TGTextButton(this, "Load Settings");
+  fLoad -> Connect("Clicked()", "FADC400", this, "LoadSettings()");
+  fLoad -> MoveResize(10, 380, 100, 50);
+
+  fSave = new TGTextButton(this, "Save Settings");
+  fSave -> Connect("Clicked()", "FADC400", this, "SaveSettings()");
+  fSave -> MoveResize(110, 380, 100, 50);
+  // == End of Buttons ============================================================
+
   MapSubwindows();
   MapWindow();
 }
@@ -377,6 +395,7 @@ FADC400::~FADC400()
 void FADC400::Initialize()
 {
   // Initialize internal variables
+  fSettings.Initialize();
 }
 
 void FADC400::SetSameModuleSetting(Bool_t value)
@@ -390,7 +409,7 @@ void FADC400::SetSameModuleSetting(Bool_t value)
   fModuleTab -> SetEnabled(1, !value);
   fModuleTab -> SetTab(0, kFALSE);
 
-  fUseSameModuleSetting = value;
+  fSettings.fUseSameModuleSetting = value;
 }
 
 void FADC400::SetAddress(Int_t value)
@@ -405,7 +424,7 @@ void FADC400::SetAddress(Int_t value)
     cout << "======================================" << endl;
   }
 
-  fValueAddress[module] = value;
+  fSettings.fValueAddress[module] = value;
 }
 
 void FADC400::SetActive(Bool_t value)
@@ -420,7 +439,7 @@ void FADC400::SetActive(Bool_t value)
     cout << "====================================" << endl;
   }
 
-  fIsActive[module] = value;
+  fSettings.fIsActive[module] = value;
 }
 
 void FADC400::SetSameChannelSetting(Bool_t value)
@@ -440,7 +459,7 @@ void FADC400::SetSameChannelSetting(Bool_t value)
   fChannelTab[module] -> SetEnabled(3, !value);
   fChannelTab[module] -> SetTab(0, kFALSE);
 
-  fUseSameChannelSetting[module] = value;
+  fSettings.fUseSameChannelSetting[module] = value;
 }
 
 void FADC400::SetDSM(Int_t value)
@@ -457,7 +476,7 @@ void FADC400::SetDSM(Int_t value)
     cout << "======================================" << endl;
   }
 
-  fValueDSM[module][channel] = mode;
+  fSettings.fValueDSM[module][channel] = mode;
 }
 
 void FADC400::SetIP(Int_t value)
@@ -474,7 +493,7 @@ void FADC400::SetIP(Int_t value)
     cout << "==================================" << endl;
   }
 
-  fValueIP[module][channel] = mode;
+  fSettings.fValueIP[module][channel] = mode;
 }
 
 void FADC400::SetID(const Char_t *value)
@@ -493,7 +512,7 @@ void FADC400::SetID(const Char_t *value)
     cout << "====================================" << endl;
   }
 
-  fValueID[module][channel] = atoi(value);
+  fSettings.fValueID[module][channel] = atoi(value);
 }
 
 void FADC400::SetAO(const Char_t *value)
@@ -512,7 +531,7 @@ void FADC400::SetAO(const Char_t *value)
     cout << "===================================" << endl;
   }
 
-  fValueAO[module][channel] = atoi(value);
+  fSettings.fValueAO[module][channel] = atoi(value);
 }
 
 void FADC400::SetThres(const Char_t *value)
@@ -531,7 +550,7 @@ void FADC400::SetThres(const Char_t *value)
     cout << "======================================" << endl;
   }
 
-  fValueThres[module][channel] = atoi(value);
+  fSettings.fValueThres[module][channel] = atoi(value);
 }
 
 void FADC400::SetRL(Int_t value)
@@ -550,7 +569,7 @@ void FADC400::SetRL(Int_t value)
     cout << "==============================================" << endl;
   }
 
-  fValueRL[module][channel] = value;
+  fSettings.fValueRL[module][channel] = value;
 }
 
 void FADC400::SetDT(const Char_t *value)
@@ -565,7 +584,7 @@ void FADC400::SetDT(const Char_t *value)
     cout << "==============================" << endl;
   }
 
-  fValueDT[module] = atoi(value);
+  fSettings.fValueDT[module] = atoi(value);
 }
 
 void FADC400::SetDTApplied(Int_t value)
@@ -587,7 +606,7 @@ void FADC400::SetDTApplied(Int_t value)
     cout << "=============================================" << endl;
   }
 
-  fValueDTApplied[module] = mode;
+  fSettings.fValueDTApplied[module] = mode;
 }
 
 void FADC400::SetCW(const Char_t *value)
@@ -602,7 +621,7 @@ void FADC400::SetCW(const Char_t *value)
     cout << "==========================" << endl;
   }
 
-  fValueCW[module] = atoi(value);
+  fSettings.fValueCW[module] = atoi(value);
 }
 
 void FADC400::SetCWApplied(Int_t value)
@@ -624,7 +643,7 @@ void FADC400::SetCWApplied(Int_t value)
     cout << "=============================================" << endl;
   }
 
-  fValueCWApplied[module] = mode;
+  fSettings.fValueCWApplied[module] = mode;
 }
 
 void FADC400::SetCLT(Int_t value)
@@ -639,7 +658,7 @@ void FADC400::SetCLT(Int_t value)
     cout << "=========================" << endl;
   }
 
-  fValueCLT[module] = mode;
+  fSettings.fValueCLT[module] = mode;
 }
 
 void FADC400::SetSameCGroupSetting(Bool_t value)
@@ -657,7 +676,7 @@ void FADC400::SetSameCGroupSetting(Bool_t value)
   fTMTab[module] -> SetEnabled(1, !value);
   fTMTab[module] -> SetTab(0, kFALSE);
 
-  fUseSameCGroupSetting[module] = value;
+  fSettings.fUseSameCGroupSetting[module] = value;
 }
 
 void FADC400::SetTriggerModeCount(Bool_t value)
@@ -682,7 +701,7 @@ void FADC400::SetTriggerModeCount(Bool_t value)
   if (value)
     fTMCountOption[module][channelGroup][1] -> SetOn(kTRUE, kTRUE);
 
-  fValueTMCount[module][channelGroup] = value;
+  fSettings.fValueTMCount[module][channelGroup] = value;
 }
 
 void FADC400::SetTMCOption(Int_t value)
@@ -710,7 +729,7 @@ void FADC400::SetTMCOption(Int_t value)
     cout << "=================================================" << endl;
   }
 
-  fValueTMCountOption[module][channelGroup] = mode;
+  fSettings.fValueTMCountOption[module][channelGroup] = mode;
 }
 
 void FADC400::SetTriggerModeWidth(Bool_t value)
@@ -735,7 +754,7 @@ void FADC400::SetTriggerModeWidth(Bool_t value)
   if (value)
     fTMWidthOption[module][channelGroup][1] -> SetOn(kTRUE, kTRUE);
 
-  fValueTMWidth[module][channelGroup] = value;
+  fSettings.fValueTMWidth[module][channelGroup] = value;
 }
 
 void FADC400::SetTMWOption(Int_t value)
@@ -763,13 +782,94 @@ void FADC400::SetTMWOption(Int_t value)
     cout << "==================================================" << endl;
   }
 
-  fValueTMWidthOption[module][channelGroup] = mode;
+  fSettings.fValueTMWidthOption[module][channelGroup] = mode;
+}
+
+void FADC400::SaveSettings()
+{
+  // Open dialog for saving action.
+  TGFileInfo fileInfo;
+  const Char_t *fileType[4] = {"FADC400CFG files", "*.fadc400cfg", 0, 0}; 
+  fileInfo.fFileTypes = fileType;
+  new TGFileDialog(gClient -> GetRoot(), this, kFDSave, &fileInfo);
+
+  // If user clicks cancel, do nothing.
+  if (fileInfo.fFilename == NULL)
+    return;
+
+  // Get the file name with path
+  TString filenameWithPath = fileInfo.fFilename;
+	TObjArray *decomposedFileNameWithPath = filenameWithPath.Tokenize("/");
+  TString savingFile = ((TObjString *) decomposedFileNameWithPath -> Last()) -> GetString();
+
+  // If the extension is not "fadc400cfg", add it.
+  TString extension = savingFile(savingFile.Length() - 11, 11);
+  if (!extension.EqualTo(".fadc400cfg")) {
+    filenameWithPath.Append(".fadc400cfg");
+    savingFile.Append(".fadc400cfg");
+  }
+
+  delete decomposedFileNameWithPath;
+  
+  ofstream saving(filenameWithPath.Data(), ios::out|ios::binary);
+  saving.write(reinterpret_cast<Char_t *>(&fSettings), sizeof(fSettings));
+  saving.close();
+
+  if (fIsDebug) {
+    cout << "===================================" << endl;
+    cout << " Parameters' setting is saved into" << endl;
+    cout << " " << savingFile.Data() << "!" << endl;
+    cout << "===================================" << endl;
+  }
+}
+
+void FADC400::LoadSettings()
+{
+  // Open dialog for loading action.
+  TGFileInfo fileInfo;
+  const Char_t *fileType[4] = {"FADC400CFG files", "*.fadc400cfg", 0, 0}; 
+  fileInfo.fFileTypes = fileType;
+  new TGFileDialog(gClient -> GetRoot(), this, kFDOpen, &fileInfo);
+
+  // If user clicks cancel, do nothing.
+  if (fileInfo.fFilename == NULL)
+    return;
+
+  // Get the file name with path
+  TString filenameWithPath = fileInfo.fFilename;
+	TObjArray *decomposedFileNameWithPath = filenameWithPath.Tokenize("/");
+  TString loadingFile = ((TObjString *) decomposedFileNameWithPath -> Last()) -> GetString();
+
+  delete decomposedFileNameWithPath;
+
+  // If the extension is not "fadc400cfg", it is not loaded.
+  TString extension = filenameWithPath(filenameWithPath.Length() - 11, 11);
+  if (!extension.EqualTo(".fadc400cfg")) {
+    cout << "====================================" << endl;
+    cout << " The file you chose cannot be used!" << endl;
+    cout << "====================================" << endl;
+
+    return;
+  } else {
+    ifstream loading(filenameWithPath.Data(), ios::in|ios::binary);
+    loading.read(reinterpret_cast<Char_t *>(&fSettings), sizeof(fSettings));
+
+    if (fIsDebug) {
+      cout << "====================================" << endl;
+      cout << " Parameters' setting is loaded from" << endl;
+      cout << " " << loadingFile.Data() << "!" << endl;
+      cout << "====================================" << endl;
+    }
+
+    // The widgets are changed according to the values from set setting file.
+    // The code for that will be here.
+  }
 }
 
 Int_t main(int argc, char **argv)
 {
 	TApplication theApp("FADC400GUI", &argc, argv);
-	new FADC400(gClient -> GetRoot(), 768, 450);
+	new FADC400(gClient -> GetRoot(), 768, 440);
 	theApp.Run();
 
 	return 0;

@@ -22,6 +22,8 @@
 #include "TGButtonGroup.h"
 #include "TGNumberEntry.h"
 
+#include "FADC400Settings.hh"
+
 class FADC400 : public TGMainFrame
 {
   public:
@@ -54,21 +56,23 @@ class FADC400 : public TGMainFrame
     void SetTriggerModeWidth(Bool_t);
     void SetTMWOption(Int_t);
 
+    void SaveSettings();
+    void LoadSettings();
+
   private:
     void Initialize();
+    FADC400Settings fSettings;
     Bool_t fIsDebug;
 
     // Module
     TGGroupFrame *fModuleFrame;
     TGCheckButton *fSameModuleSettingButton;
-    Bool_t fUseSameModuleSetting;
     TGTab *fModuleTab;
     TGCompositeFrame *fFADC[2];
 
     // Channel setting frame
     TGGroupFrame *fChannelFrame[2];
     TGCheckButton *fSameChannelSettingButton[2];
-    Bool_t fUseSameChannelSetting[2];
 
     // Channel Tab
     TGTab *fChannelTab[2];
@@ -77,41 +81,33 @@ class FADC400 : public TGMainFrame
     // Channel
     TGLabel *fTextAddress;
     TGComboBox *fCBAddress[2];
-    Int_t fValueAddress[2];
     TGButton *fActive[2];
-    Bool_t fIsActive[2];
 
     // Data saving mode
     TGLabel *fTextDSM;
     TGHButtonGroup *fDSMGroup;
     TGRadioButton *fDSM[2][4][2];
-    Bool_t fValueDSM[2][4];
 
     // Input polarity
     TGLabel *fTextIP;
     TGHButtonGroup *fIPGroup;
     TGRadioButton *fIP[2][4][2];
-    Bool_t fValueIP[2][4];
 
     // Input delay
     TGLabel *fTextID;
     TGNumberEntryField *fID[2][4];
-    Int_t fValueID[2][4];
 
     // ADC Offset
     TGLabel *fTextAO;
     TGNumberEntryField *fAO[2][4];
-    Int_t fValueAO[2][4];
 
     // Threshold
     TGLabel *fTextThres;
     TGNumberEntryField *fThres[2][4];
-    Int_t fValueThres[2][4];
 
     // Recording length
     TGLabel *fTextRL;
     TGComboBox *fRL[2][4];
-    Int_t fValueRL[2][4];
 
     // Trigger Frame
     TGGroupFrame *fTriggerFrame[2];
@@ -121,24 +117,19 @@ class FADC400 : public TGMainFrame
     // Deadtime
     TGLabel *fTextDT;
     TGNumberEntryField *fDT[2];
-    Int_t fValueDT[2];
     TGHButtonGroup *fDTAppliedGroup;
     TGRadioButton *fDTApplied[2][3];
-    Int_t fValueDTApplied[2];
 
     // Coincidence Width
     TGLabel *fTextCW;
     TGNumberEntryField *fCW[2];
-    Int_t fValueCW[2];
     TGHButtonGroup *fCWAppliedGroup;
     TGRadioButton *fCWApplied[2][3];
-    Int_t fValueCWApplied[2];
 
     // Contidion Lookup Table
     TGLabel *fTextCLT;
     TGHButtonGroup *fCLTGroup;
     TGRadioButton *fCLT[2][2];
-    Int_t fValueCLT[2];
 
     // Trigger Mode Frame
     TGGroupFrame *fTModeFrame[2];
@@ -147,21 +138,19 @@ class FADC400 : public TGMainFrame
     TGCompositeFrame *fTMCG[2][2];
 
     TGCheckButton *fSameCGroupSettingButton[2];
-    Bool_t fUseSameCGroupSetting[2];
 
     // Trigger Mode Channel Group Tab
     TGCheckButton *fTMCount[2][2];
-    Bool_t fValueTMCount[2][2];
     TGButtonGroup *fTMCountOptionGroup[2][2];
     TGRadioButton *fTMCountOption[2][2][4];
-    Int_t fValueTMCountOption[2][2];
 
     TGCheckButton *fTMWidth[2][2];
-    Bool_t fValueTMWidth[2][2];
     TGButtonGroup *fTMWidthOptionGroup[2][2];
     TGRadioButton *fTMWidthOption[2][2][4];
-    Int_t fValueTMWidthOption[2][2];
 
+    // Buttons
+    TGTextButton *fLoad;
+    TGTextButton *fSave;
 
   ClassDef(FADC400, 1);
 };
