@@ -365,6 +365,20 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   // == End of Modules ============================================================
   // == End of Module Frame =======================================================
 
+  // == Start of Number of Events =================================================
+  fTextNumEvents = new TGLabel(this, "# of events");
+  fTextNumEvents -> Move(568, 387);
+
+  fNumEvents = new TGNumberEntryField(this, -1, 1000, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive, TGNumberFormat::kNELLimitMax, 0, 1569325055);
+  fNumEvents -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetNumEvents(const Char_t *)");
+  fNumEvents -> MoveResize(572, 403, 80, 18);
+  AddFrame(fNumEvents);
+  // == End of Number of Events ===================================================
+
+  fStart = new TGTextButton(this, "Start");
+  fStart -> Connect("Clicked()", "FADC400", this, "Start()");
+  fStart -> MoveResize(662, 380, 100, 50);
+
   MapSubwindows();
   MapWindow();
 }
@@ -764,6 +778,21 @@ void FADC400::SetTMWOption(Int_t value)
   }
 
   fValueTMWidthOption[module][channelGroup] = mode;
+}
+
+void FADC400::SetNumEvents(const Char_t *value)
+{
+  if (fIsDebug) {
+    cout << "=============================" << endl;
+    cout << " SetNumEvents";
+    cout << " is " << atoi(value) << "!" << endl;
+    cout << "=============================" << endl;
+  }
+}
+
+void FADC400::Start()
+{
+  // Start Action will be here
 }
 
 Int_t main(int argc, char **argv)
