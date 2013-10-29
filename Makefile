@@ -17,7 +17,7 @@ endif
 PREFIX = FADC400
 TARGET = $(PREFIX)
 SOURCE = $(wildcard $(PREFIX)*.cc)
-HEADER = $(filter-out FADC400Settings.hh, $(wildcard $(PREFIX)*.hh))
+HEADER = FADC400.hh
 DICT = $(TARGET)Dict.cc
 LINKDEF = $(TARGET)LinkDef.hh
 CFLAGS = -I./ $(ROOT_CFLAGS) $(NK_CFLAGS)
