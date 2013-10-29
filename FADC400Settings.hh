@@ -18,6 +18,9 @@ class FADC400Settings
 {
   public:
     void Initialize();
+    void UseSameModuleSetting();
+    void UseSameChannelSetting(Int_t);
+    void UseSameCGroupSetting(Int_t);
 
     Bool_t fUseSameModuleSetting;
     Int_t fValueAddress[2];
@@ -39,6 +42,8 @@ class FADC400Settings
     Int_t fValueTMCountOption[2][2];
     Bool_t fValueTMWidth[2][2];
     Int_t fValueTMWidthOption[2][2];
+
+    Int_t fValueNumEvents;
 };
 
 #endif

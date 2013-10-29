@@ -43,4 +43,73 @@ void FADC400Settings::Initialize()
       fValueTMWidthOption[iModule][iCGroup] = 0;
     }
   }
+
+  fValueNumEvents = 0;
+}
+
+void FADC400Settings::UseSameModuleSetting()
+{
+  fIsActive[1] = fIsActive[0];
+  
+  if (fUseSameChannelSetting[0]) {
+    fValueDSM[1][0] = fValueDSM[0][0];
+    fValueIP[1][0] = fValueIP[0][0];
+    fValueID[1][0] = fValueID[0][0];
+    fValueAO[1][0] = fValueAO[0][0];
+    fValueThres[1][0] = fValueThres[0][0];
+    fValueRL[1][0] = fValueRL[0][0];
+
+    UseSameChannelSetting(1);
+  } else {
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fValueDSM[1][iChannel] = fValueDSM[0][iChannel];
+      fValueIP[1][iChannel] = fValueIP[0][iChannel];
+      fValueID[1][iChannel] = fValueID[0][iChannel];
+      fValueAO[1][iChannel] = fValueAO[0][iChannel];
+      fValueThres[1][iChannel] = fValueThres[0][iChannel];
+      fValueRL[1][iChannel] = fValueRL[0][iChannel];
+    }
+  }
+
+  fValueDT[1] = fValueDT[0];
+  fValueDTApplied[1] = fValueDTApplied[0];
+  fValueCW[1] = fValueCW[0];
+  fValueCWApplied[1] = fValueCWApplied[0];
+  fValueCLT[1] = fValueCLT[0];
+
+  if (fUseSameCGroupSetting[0]) {
+    fValueTMCount[1][0] = fValueTMCount[0][0];
+    fValueTMCountOption[1][0] = fValueTMCountOption[0][0];
+    fValueTMWidth[1][0] = fValueTMWidth[0][0];
+    fValueTMWidthOption[1][0] = fValueTMWidthOption[0][0];
+
+    UseSameCGroupSetting(1);
+  } else {
+    for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
+      fValueTMCount[1][iCGroup] = fValueTMCount[0][iCGroup];
+      fValueTMCountOption[1][iCGroup] = fValueTMCountOption[0][iCGroup];
+      fValueTMWidth[1][iCGroup] = fValueTMWidth[0][iCGroup];
+      fValueTMWidthOption[1][iCGroup] = fValueTMWidthOption[0][iCGroup];
+    }
+  }
+}
+
+void FADC400Settings::UseSameChannelSetting(Int_t module)
+{
+  for (Int_t iChannel = 1; iChannel < 4; iChannel++) {
+    fValueDSM[module][iChannel] = fValueDSM[module][0];
+    fValueIP[module][iChannel] = fValueIP[module][0];
+    fValueID[module][iChannel] = fValueID[module][0];
+    fValueAO[module][iChannel] = fValueAO[module][0];
+    fValueThres[module][iChannel] = fValueThres[module][0];
+    fValueRL[module][iChannel] = fValueRL[module][0];
+  }
+}
+
+void FADC400Settings::UseSameCGroupSetting(Int_t module)
+{
+  fValueTMCount[module][1] = fValueTMCount[module][0];
+  fValueTMCountOption[module][1] = fValueTMCountOption[module][0];
+  fValueTMWidth[module][1] = fValueTMWidth[module][0];
+  fValueTMWidthOption[module][1] = fValueTMWidthOption[module][0];
 }

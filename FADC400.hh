@@ -62,6 +62,9 @@ class FADC400 : public TGMainFrame
     void LoadSettings();
     void Start();
 
+    void SetSettingsFromUI();
+    void SetSettingsToUI();
+
   private:
     void Initialize();
     FADC400Settings fSettings;
