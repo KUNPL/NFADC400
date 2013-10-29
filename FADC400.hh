@@ -56,8 +56,11 @@ class FADC400 : public TGMainFrame
     void SetTriggerModeWidth(Bool_t);
     void SetTMWOption(Int_t);
 
+    void SetNumEvents(const Char_t *);
+
     void SaveSettings();
     void LoadSettings();
+    void Start();
 
   private:
     void Initialize();
@@ -148,9 +151,14 @@ class FADC400 : public TGMainFrame
     TGButtonGroup *fTMWidthOptionGroup[2][2];
     TGRadioButton *fTMWidthOption[2][2][4];
 
+    // The number of events to take
+    TGLabel *fTextNumEvents;
+    TGNumberEntryField *fNumEvents;
+
     // Buttons
     TGTextButton *fLoad;
     TGTextButton *fSave;
+    TGTextButton *fStart;
 
   ClassDef(FADC400, 1);
 };
