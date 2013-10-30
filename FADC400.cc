@@ -209,16 +209,16 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fFADC[iModule] -> AddFrame(fTriggerFrame[iModule]);
 
     // == Start of Condition Lookup Table =======================================
-    fTextCLT = new TGLabel(fTriggerFrame[iModule], "Trigger off if trigger signal exists from Ch 1&2");
+    fTextCLT = new TGLabel(fTriggerFrame[iModule], "Trigger if trigger signal exists from Ch 1&2");
     fTextCLT -> Move(10, 22);
     fTextCLT = new TGLabel(fTriggerFrame[iModule], "Ch 3&4.");
-    fTextCLT -> Move(325, 22);
+    fTextCLT -> Move(310, 22);
     fCLT[iModule] = new TGComboBox(fTriggerFrame[iModule], iModule*100);
     fCLT[iModule] -> AddEntry("AND", 0);
     fCLT[iModule] -> AddEntry("OR", 1);
     fCLT[iModule] -> Connect("Selected(Int_t)", "FADC400", this, "SetCLT(Int_t)");
     fCLT[iModule] -> Select(0);
-    fCLT[iModule] -> MoveResize(265, 22, 55, 18);
+    fCLT[iModule] -> MoveResize(250, 22, 55, 18);
     fTriggerFrame[iModule] -> AddFrame(fCLT[iModule]);
     // == End of Condition Lookup Table =========================================
 
@@ -345,26 +345,26 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
   // == Start of Number of Events =================================================
   fTextNumEvents = new TGLabel(this, "# of events");
-  fTextNumEvents -> Move(568, 387);
+  fTextNumEvents -> Move(575, 377);
 
   fNumEvents = new TGNumberEntryField(this, -1, 1000, TGNumberFormat::kNESInteger, TGNumberFormat::kNEAPositive, TGNumberFormat::kNELLimitMax, 0, 1569325055);
   fNumEvents -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetNumEvents(const Char_t *)");
-  fNumEvents -> MoveResize(572, 403, 80, 18);
+  fNumEvents -> MoveResize(575, 393, 80, 18);
   AddFrame(fNumEvents);
   // == End of Number of Events ===================================================
 
   // == Start of Buttons ==========================================================
   fLoad = new TGTextButton(this, "Load Settings");
   fLoad -> Connect("Clicked()", "FADC400", this, "LoadSettings()");
-  fLoad -> MoveResize(5, 380, 100, 50);
+  fLoad -> MoveResize(5, 370, 100, 50);
 
   fSave = new TGTextButton(this, "Save Settings");
   fSave -> Connect("Clicked()", "FADC400", this, "SaveSettings()");
-  fSave -> MoveResize(105, 380, 100, 50);
+  fSave -> MoveResize(105, 370, 100, 50);
 
   fStart = new TGTextButton(this, "Start");
   fStart -> Connect("Clicked()", "FADC400", this, "Start()");
-  fStart -> MoveResize(662, 380, 100, 50);
+  fStart -> MoveResize(664, 370, 100, 50);
   // == End of Buttons ============================================================
 
   MapSubwindows();
@@ -1048,7 +1048,7 @@ void FADC400::SetSettingsToUI()
 Int_t main(int argc, char **argv)
 {
 	TApplication theApp("FADC400GUI", &argc, argv);
-	new FADC400(gClient -> GetRoot(), 770, 440);
+	new FADC400(gClient -> GetRoot(), 770, 425);
 	theApp.Run();
 
 	return 0;
