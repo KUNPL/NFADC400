@@ -12,6 +12,8 @@
 #ifndef __FADC400PROCESS_H_
 #define __FADC400PROCESS_H_
 
+#include "FADC400Constants.hh"
+
 class FADC400Process 
 {
   public:
