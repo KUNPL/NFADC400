@@ -43,18 +43,21 @@ class FADC400 : public TGMainFrame
     void SetThres(const Char_t *);
     void SetRL(Int_t);
 
-    void SetDT(const Char_t *);
-    void SetDTApplied(Int_t);
-    void SetCW(const Char_t *);
-    void SetCWApplied(Int_t);
-
     void SetCLT(Int_t);
 
     void SetSameCGroupSetting(Bool_t);
-    void SetTriggerModeCount(Bool_t);
-    void SetTMCOption(Int_t);
+
+    void SetDT(const Char_t *);
+    void SetCW(const Char_t *);
+
     void SetTriggerModeWidth(Bool_t);
     void SetTMWOption(Int_t);
+    void SetTMWThres(const Char_t *);
+
+    void SetTriggerModeCount(Bool_t);
+    void SetTMCOption(Int_t);
+    void SetTMCThres(const Char_t *);
+    void SetTMCInterval(const Char_t *);
 
     void SetNumEvents(const Char_t *);
 
@@ -86,18 +89,16 @@ class FADC400 : public TGMainFrame
 
     // Channel
     TGLabel *fTextAddress;
-    TGComboBox *fCBAddress[2];
+    TGComboBox *fAddress[2];
     TGButton *fActive[2];
 
     // Data saving mode
     TGLabel *fTextDSM;
-    TGHButtonGroup *fDSMGroup;
-    TGRadioButton *fDSM[2][4][2];
+    TGComboBox *fDSM[2][4];
 
     // Input polarity
     TGLabel *fTextIP;
-    TGHButtonGroup *fIPGroup;
-    TGRadioButton *fIP[2][4][2];
+    TGComboBox *fIP[2][4];
 
     // Input delay
     TGLabel *fTextID;
@@ -118,41 +119,40 @@ class FADC400 : public TGMainFrame
     // Trigger Output Frame
     TGGroupFrame *fTriggerFrame[2];
 
-    TGLabel *fTextFor;
-
-    // Deadtime
-    TGLabel *fTextDT;
-    TGNumberEntryField *fDT[2];
-    TGHButtonGroup *fDTAppliedGroup;
-    TGRadioButton *fDTApplied[2][3];
-
-    // Coincidence Width
-    TGLabel *fTextCW;
-    TGNumberEntryField *fCW[2];
-    TGHButtonGroup *fCWAppliedGroup;
-    TGRadioButton *fCWApplied[2][3];
-
     // Contidion Lookup Table
     TGLabel *fTextCLT;
-    TGHButtonGroup *fCLTGroup;
-    TGRadioButton *fCLT[2][2];
+    TGComboBox *fCLT[2];
 
     // Trigger Mode Frame
     TGGroupFrame *fTModeFrame[2];
 
-    TGTab *fTMTab[2];
-    TGCompositeFrame *fTMCG[2][2];
-
     TGCheckButton *fSameCGroupSettingButton[2];
 
     // Trigger Mode Channel Group Tab
+    TGTab *fTMTab[2];
+    TGCompositeFrame *fTMCG[2][2];
+
+    // Deadtime
+    TGLabel *fTextDT;
+    TGNumberEntryField *fDT[2][2];
+
+    // Coincidence Width
+    TGLabel *fTextCW;
+    TGNumberEntryField *fCW[2][2];
+
+    // Width Trigger mode
+    TGCheckButton *fTMWidth[2][2];
+    TGComboBox *fTMWidthOption[2][2];
+    TGLabel *fTextTWidth;
+    TGNumberEntryField *fTMWidthThres[2][2];
+
+    // Count Trigger mode
     TGCheckButton *fTMCount[2][2];
+    TGLabel *fTextTMCount;
     TGButtonGroup *fTMCountOptionGroup[2][2];
     TGRadioButton *fTMCountOption[2][2][4];
-
-    TGCheckButton *fTMWidth[2][2];
-    TGButtonGroup *fTMWidthOptionGroup[2][2];
-    TGRadioButton *fTMWidthOption[2][2][4];
+    TGNumberEntryField *fTMCountThres[2][2][3];
+    TGNumberEntryField *fTMCountInterval[2][2][3];
 
     // The number of events to take
     TGLabel *fTextNumEvents;
