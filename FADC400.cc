@@ -205,8 +205,8 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     // == End of Channel Tab ====================================================
     // == End of Channel Setting Frame ==========================================
 
-    // == Start of Trigger Frame ================================================
-    fTriggerFrame[iModule] = new TGGroupFrame(fFADC[iModule], "Trigger Setting");
+    // == Start of Trigger Output Frame =========================================
+    fTriggerFrame[iModule] = new TGGroupFrame(fFADC[iModule], "Trigger Output Setting");
     fTriggerFrame[iModule] -> SetLayoutBroken(kTRUE);
 
     Int_t triggerFrameHMargin = 10;
@@ -368,7 +368,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     // == End of Trigger Mode Channel Group Tab =================================
     // == End of Trigger Mode Channel Group =====================================
     // == End of Trigger Mode Frame =============================================
-    // == End of Trigger Frame ==================================================
+    // == End of Trigger Output Frame ===========================================
   }
   // == End of Modules ============================================================
   // == End of Module Frame =======================================================

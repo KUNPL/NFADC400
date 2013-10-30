@@ -115,7 +115,7 @@ class FADC400 : public TGMainFrame
     TGLabel *fTextRL;
     TGComboBox *fRL[2][4];
 
-    // Trigger Frame
+    // Trigger Output Frame
     TGGroupFrame *fTriggerFrame[2];
 
     TGLabel *fTextFor;
