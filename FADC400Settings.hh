@@ -32,16 +32,17 @@ class FADC400Settings
     Int_t fValueAO[2][4];
     Int_t fValueThres[2][4];
     Int_t fValueRL[2][4];
-    Int_t fValueDT[2];
-    Int_t fValueDTApplied[2];
-    Int_t fValueCW[2];
-    Int_t fValueCWApplied[2];
     Int_t fValueCLT[2];
     Bool_t fUseSameCGroupSetting[2];
-    Bool_t fValueTMCount[2][2];
-    Int_t fValueTMCountOption[2][2];
+    Int_t fValueDT[2][2];
+    Int_t fValueCW[2][2];
     Bool_t fValueTMWidth[2][2];
     Int_t fValueTMWidthOption[2][2];
+    Double_t fValueTMWidthThres[2][2];
+    Bool_t fValueTMCount[2][2];
+    Int_t fValueTMCountOption[2][2];
+    Int_t fValueTMCountThres[2][2][2];
+    Int_t fValueTMCountInterval[2][2][2];
 
     Int_t fValueNumEvents;
 };

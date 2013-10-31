@@ -163,6 +163,9 @@ class FADC400 : public TGMainFrame
     TGTextButton *fSave;
     TGTextButton *fStart;
 
+    // Copyright
+    TGLabel *fCopyright;
+
   ClassDef(FADC400, 1);
 };
 
