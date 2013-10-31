@@ -103,7 +103,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fFADC[iModule] -> AddFrame(fChannelFrame[iModule]);
 
     // == Start of Channel Tab ==================================================
-    fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channel.", iModule);
+    fSameChannelSettingButton[iModule] = new TGCheckButton(fChannelFrame[iModule], "Use the same settings for all channels.", iModule);
     fSameChannelSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameChannelSetting(Bool_t)");
     fSameChannelSettingButton[iModule] -> Move(10, 20);
 
@@ -209,20 +209,20 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fFADC[iModule] -> AddFrame(fTriggerFrame[iModule]);
 
     // == Start of Condition Lookup Table =======================================
-    fTextCLT = new TGLabel(fTriggerFrame[iModule], "Trigger if trigger signal exists from Ch 1&2");
+    fTextCLT = new TGLabel(fTriggerFrame[iModule], "Trigger if a trigger signal exists from Ch 1&2");
     fTextCLT -> Move(10, 22);
     fTextCLT = new TGLabel(fTriggerFrame[iModule], "Ch 3&4.");
-    fTextCLT -> Move(310, 22);
+    fTextCLT -> Move(320, 22);
     fCLT[iModule] = new TGComboBox(fTriggerFrame[iModule], iModule*100);
     fCLT[iModule] -> AddEntry("AND", 0);
     fCLT[iModule] -> AddEntry("OR", 1);
     fCLT[iModule] -> Connect("Selected(Int_t)", "FADC400", this, "SetCLT(Int_t)");
     fCLT[iModule] -> Select(0);
-    fCLT[iModule] -> MoveResize(250, 22, 55, 18);
+    fCLT[iModule] -> MoveResize(260, 22, 55, 18);
     fTriggerFrame[iModule] -> AddFrame(fCLT[iModule]);
     // == End of Condition Lookup Table =========================================
 
-    fSameCGroupSettingButton[iModule] = new TGCheckButton(fTriggerFrame[iModule], "Use the same setting for all channel group.", iModule);
+    fSameCGroupSettingButton[iModule] = new TGCheckButton(fTriggerFrame[iModule], "Use the same setting for all channel groups.", iModule);
     fSameCGroupSettingButton[iModule] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetSameCGroupSetting(Bool_t)");
     fSameCGroupSettingButton[iModule] -> Move(10, 44);
 
@@ -269,9 +269,12 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
       fCW[iModule][iCGroup] -> Connect("ReturnPressed()", "TGNumberEntryField", fDT[iModule][iCGroup], "SetFocus()");
       // == End of Tab and Return pressed on TextEntries ==========================
 
+      // == Start of Common variables for Channel Group ===========================
       Int_t lowCh = pow(3., iCGroup);
       Int_t highCh = pow(2., iCGroup + 1);
+      // == End of Common variables for Channel Group =============================
 
+      // == Start of Width Trigger mode ===========================================
       fTMWidth[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Width of", widgetID);
       fTMWidth[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeWidth(Bool_t)");
       fTMWidth[iModule][iCGroup] -> Move(10, 60);
@@ -292,7 +295,9 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
       fTMWidthThres[iModule][iCGroup] -> MoveResize(360, 60, 50, 18);
       fTMWidthThres[iModule][iCGroup] -> SetEnabled(kFALSE);
       fTMCG[iModule][iCGroup] -> AddFrame(fTMWidthThres[iModule][iCGroup]);
+      // == End of Width Trigger mode =============================================
 
+      // == Start of Count Trigger mode ===========================================
       fTMCount[iModule][iCGroup] = new TGCheckButton(fTMCG[iModule][iCGroup], "Count", widgetID);
       fTMCount[iModule][iCGroup] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetTriggerModeCount(Bool_t)");
       fTMCount[iModule][iCGroup] -> Move(10, 85);
@@ -335,6 +340,7 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
         fTMCountInterval[iModule][iCGroup][iOption] -> SetEnabled(kFALSE);
         fTMCG[iModule][iCGroup] -> AddFrame(fTMCountInterval[iModule][iCGroup][iOption]);
       }
+      // == End of Count Trigger mode =============================================
     }
     // == End of Trigger Mode Channel Group Tab =================================
     // == End of Trigger Mode Channel Group =====================================
@@ -366,6 +372,13 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fStart -> Connect("Clicked()", "FADC400", this, "Start()");
   fStart -> MoveResize(664, 370, 100, 50);
   // == End of Buttons ============================================================
+
+  // == Start of Copyright ========================================================
+  fCopyright = new TGLabel(this, "Property of Korea University Nuclear Physics Laboratory");
+  fCopyright -> Move(232, 405);
+  fCopyright = new TGLabel(this, "Designed and developed by Genie Jhang");
+  fCopyright -> Move(275, 380);
+  // == End of Copyright ==========================================================
 
   MapSubwindows();
   MapWindow();
@@ -578,7 +591,7 @@ void FADC400::SetDT(const Char_t *value)
     cout << "=======================================" << endl;
   }
 
-  fSettings.fValueDT[module] = atoi(value);
+  fSettings.fValueDT[module][cgroup] = atoi(value);
 }
 
 void FADC400::SetCW(const Char_t *value)
@@ -597,22 +610,24 @@ void FADC400::SetCW(const Char_t *value)
     cout << "===================================" << endl;
   }
 
-  fSettings.fValueCW[module] = atoi(value);
+  fSettings.fValueCW[module][cgroup] = atoi(value);
 }
 
 void FADC400::SetCLT(Int_t value)
 {
-  Int_t module = value/100;
-  Int_t mode = value%10;
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
 
   if (fIsDebug) {
     cout << "=========================" << endl;
     cout << " SetCLT module:" << module + 1;
-    cout << " is " << ( mode ? "OR!" : "AND!" ) << endl;
+    cout << " is " << ( value ? "OR!" : "AND!" ) << endl;
     cout << "=========================" << endl;
   }
 
-  fSettings.fValueCLT[module] = mode;
+  fSettings.fValueCLT[module] = value;
 }
 
 void FADC400::SetSameCGroupSetting(Bool_t value)
@@ -642,11 +657,11 @@ void FADC400::SetTriggerModeWidth(Bool_t value)
   Int_t cgroup = (widgetID%100)/10;
 
   if (fIsDebug) {
-    cout << "=====================================================" << endl;
+    cout << "===============================================" << endl;
     cout << " SetTriggerModeWidth module:" << module + 1;
     cout << " cgroup:" << cgroup + 1;
     cout << " is " << ( value ? "On!" : "Off!" ) << endl;
-    cout << "=====================================================" << endl;
+    cout << "===============================================" << endl;
   }
 
   fTMWidthOption[module][cgroup] -> SetEnabled(value);
@@ -702,7 +717,7 @@ void FADC400::SetTMWThres(const Char_t *value)
     cout << "=============================================" << endl;
   }
 
-//  fSettings.f[module][cgroup] = atof(value);
+  fSettings.fValueTMWidthThres[module][cgroup] = atof(value);
 }
 
 void FADC400::SetTriggerModeCount(Bool_t value)
@@ -724,14 +739,11 @@ void FADC400::SetTriggerModeCount(Bool_t value)
   for (Int_t option = 0; option < 4; option++) {
     fTMCountOption[module][cgroup][option] -> SetEnabled(value);
 
-    if (option < 3) {
+    if (option < 3 && value == kFALSE) {
       fTMCountThres[module][cgroup][option] -> SetEnabled(value);
       fTMCountInterval[module][cgroup][option] -> SetEnabled(value);
     }
   }
-
-  if (value)
-    fTMCountOption[module][cgroup][0] -> SetOn(kTRUE, kTRUE);
 
   fSettings.fValueTMCount[module][cgroup] = value;
 }
@@ -743,7 +755,7 @@ void FADC400::SetTMCOption(Int_t value)
   Int_t mode = value%10;
 
   if (fIsDebug) {
-    cout << "=================================================" << endl;
+    cout << "==========================================" << endl;
     cout << " SetTMCOption module:" << module + 1;
     cout << " cgroup:" << cgroup + 1;
     cout << " is ";
@@ -751,14 +763,14 @@ void FADC400::SetTMCOption(Int_t value)
     Int_t lowCh = pow(3., cgroup);
     Int_t highCh = pow(2., cgroup + 1);
     if (mode == 0)
-      cout << lowCh << " + " << highCh << "!" << endl;
+      cout << lowCh << "+" << highCh << "!" << endl;
     else if (mode == 1)
       cout << lowCh << "!" << endl;
     else if (mode == 2)
       cout << highCh << "!" << endl;
     else
-      cout << lowCh << " OR " << highCh << "!" << endl;
-    cout << "=================================================" << endl;
+      cout << lowCh << "AND" << highCh << "!" << endl;
+    cout << "==========================================" << endl;
   }
 
   if (mode == 3) {
@@ -766,8 +778,9 @@ void FADC400::SetTMCOption(Int_t value)
       fTMCountThres[module][cgroup][option] -> SetEnabled(kTRUE);
       fTMCountInterval[module][cgroup][option] -> SetEnabled(kTRUE);
     }
-      fTMCountThres[module][cgroup][0] -> SetEnabled(kFALSE);
-      fTMCountInterval[module][cgroup][0] -> SetEnabled(kFALSE);
+
+    fTMCountThres[module][cgroup][0] -> SetEnabled(kFALSE);
+    fTMCountInterval[module][cgroup][0] -> SetEnabled(kFALSE);
   } else {
     for (Int_t option = 0; option < 3; option++) {
       if (option == mode) {
@@ -791,16 +804,17 @@ void FADC400::SetTMCThres(const Char_t *value)
   Int_t module = widgetID/100;
   Int_t cgroup = (widgetID%100)/10;
   Int_t option = widgetID%10;
+  Int_t option3 = fSettings.fValueTMCountOption[module][cgroup];
 
   if (fIsDebug) {
-    cout << "===================================================" << endl;
+    cout << "========================================================================" << endl;
     cout << " SetTMCThres module:" << module + 1;
     cout << " cgroup:" << cgroup + 1;
     cout << " option:";
 
     Int_t lowCh = pow(3., cgroup);
     Int_t highCh = pow(2., cgroup + 1);
-//    if (option != 2) { when the mode is not 3
+    if (option3 != 3) {
       if (option == 0)
         cout << lowCh << "+" << highCh;
       else if (option == 1)
@@ -809,13 +823,18 @@ void FADC400::SetTMCThres(const Char_t *value)
         cout << highCh;
 
       cout << " is " << atoi(value) << "!" << endl;
-        /* when the mode is 3
+
+      fSettings.fValueTMCountThres[module][cgroup][0] = atoi(value);
     } else {
+      fSettings.fValueTMCountThres[module][cgroup][option - 1] = atoi(value);
+
+      Int_t thresLow = fSettings.fValueTMCountThres[module][cgroup][0];
+      Int_t thresHigh = fSettings.fValueTMCountThres[module][cgroup][1];
+
       cout << lowCh << "AND" << highCh;
-      cout << " is " << atoi(value) << "!" << endl;
+      cout << " is " << thresLow << " and " << thresHigh << ", respectively!" << endl;
     }
-    */
-    cout << "===================================================" << endl;
+    cout << "========================================================================" << endl;
 
   }
 }
@@ -828,16 +847,17 @@ void FADC400::SetTMCInterval(const Char_t *value)
   Int_t module = widgetID/100;
   Int_t cgroup = (widgetID%100)/10;
   Int_t option = widgetID%10;
+  Int_t option3 = fSettings.fValueTMCountOption[module][cgroup];
 
   if (fIsDebug) {
-    cout << "==========================================================" << endl;
+    cout << "==================================================================================" << endl;
     cout << " SetTMCInterval module:" << module + 1;
     cout << " cgroup:" << cgroup + 1;
-    cout << " option: ";
+    cout << " option:";
 
     Int_t lowCh = pow(3., cgroup);
     Int_t highCh = pow(2., cgroup + 1);
-//    if (option != 2) { when the mode is not 3
+    if (option3 != 3) {
       if (option == 0)
         cout << lowCh << "+" << highCh;
       else if (option == 1)
@@ -846,13 +866,17 @@ void FADC400::SetTMCInterval(const Char_t *value)
         cout << highCh;
 
       cout << " is " << atoi(value) << "!" << endl;
-        /* when the mode is 3
+
+      fSettings.fValueTMCountInterval[module][cgroup][0] = atoi(value);
     } else {
+      fSettings.fValueTMCountInterval[module][cgroup][option - 1] = atoi(value);
+
+      Int_t intervalLow = fSettings.fValueTMCountInterval[module][cgroup][0];
+      Int_t intervalHigh = fSettings.fValueTMCountInterval[module][cgroup][1];
       cout << lowCh << "AND" << highCh;
-      cout << " is " << atoi(value) << "!" << endl;
+      cout << " is " << intervalLow << " and " << intervalHigh << ", respectively!" << endl;
     }
-    */
-    cout << "==========================================================" << endl;
+    cout << "==================================================================================" << endl;
   }
 }
 
@@ -968,6 +992,21 @@ void FADC400::SetSettingsFromUI()
     for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
       fDT[iModule][iCGroup] -> TextChanged();
       fCW[iModule][iCGroup] -> TextChanged();
+
+      fTMWidthThres[iModule][iCGroup] -> TextChanged();
+
+      if (fSettings.fValueTMCount[iModule][iCGroup]) {
+        Int_t option = fSettings.fValueTMCountOption[iModule][iCGroup];
+        if (option == 3) {
+          fTMCountThres[iModule][iCGroup][1] -> TextChanged();
+          fTMCountThres[iModule][iCGroup][2] -> TextChanged();
+          fTMCountInterval[iModule][iCGroup][1] -> TextChanged();
+          fTMCountInterval[iModule][iCGroup][2] -> TextChanged();
+        } else {
+          fTMCountThres[iModule][iCGroup][option] -> TextChanged();
+          fTMCountInterval[iModule][iCGroup][option] -> TextChanged();
+        }
+      }
     }
   }
 
@@ -1021,23 +1060,34 @@ void FADC400::SetSettingsToUI()
       fSameCGroupSettingButton[iModule] -> SetState(kButtonUp, kTRUE);
 
     for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
-      fDT[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueDT[iModule]), kFALSE);
-//      fDTApplied[iModule][fSettings.fValueDTApplied[iModule]] -> SetState(kButtonDown, kTRUE);
-      fCW[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueCW[iModule]), kFALSE);
-//      fCWApplied[iModule][fSettings.fValueCWApplied[iModule]] -> SetState(kButtonDown, kTRUE);
-
-      if (fSettings.fValueTMCount[iModule][iCGroup]) {
-        fTMCount[iModule][iCGroup] -> SetState(kButtonDown, kTRUE);
-        fTMCountOption[iModule][iCGroup][fSettings.fValueTMCountOption[iModule][iCGroup]] -> SetState(kButtonDown, kTRUE);
-      } else {
-        fTMCount[iModule][iCGroup] -> SetState(kButtonUp, kTRUE);
-      }
+      fDT[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueDT[iModule][iCGroup]), kFALSE);
+      fCW[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueCW[iModule][iCGroup]), kFALSE);
 
       if (fSettings.fValueTMWidth[iModule][iCGroup]) {
         fTMWidth[iModule][iCGroup] -> SetState(kButtonDown, kTRUE);
         fTMWidthOption[iModule][iCGroup] -> Select(fSettings.fValueTMWidthOption[iModule][iCGroup]);
+        fTMWidthThres[iModule][iCGroup] -> SetText(Form("%.1f", fSettings.fValueTMWidthThres[iModule][iCGroup]));
       } else {
         fTMWidth[iModule][iCGroup] -> SetState(kButtonUp, kTRUE);
+      }
+
+      if (fSettings.fValueTMCount[iModule][iCGroup]) {
+        fTMCount[iModule][iCGroup] -> SetState(kButtonDown, kTRUE);
+
+        Int_t option = fSettings.fValueTMCountOption[iModule][iCGroup];
+        fTMCountOption[iModule][iCGroup][option] -> SetState(kButtonDown, kTRUE);
+        if (option != 3) {
+          fTMCountThres[iModule][iCGroup][option] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][0]));
+          fTMCountInterval[iModule][iCGroup][option] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][0]));
+        } else {
+          fTMCountThres[iModule][iCGroup][1] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][0]));
+          fTMCountThres[iModule][iCGroup][2] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][1]));
+          fTMCountInterval[iModule][iCGroup][1] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][0]));
+          fTMCountInterval[iModule][iCGroup][2] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][1]));
+        }
+
+      } else {
+        fTMCount[iModule][iCGroup] -> SetState(kButtonUp, kTRUE);
       }
     }
   }
