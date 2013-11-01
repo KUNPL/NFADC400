@@ -122,55 +122,63 @@ FADC400::FADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     for (Int_t iChannel = 0; iChannel < 4; iChannel++ ) {
       Int_t widgetID = iModule*100 + iChannel*10;
+      // == Start of Activating Channel ===========================================
+      fTextAC = new TGLabel(fCh[iModule][iChannel], "Activate channel");
+      fTextAC -> Move(10, 9);
+      fAC[iModule][iChannel] = new TGCheckButton(fCh[iModule][iChannel], "", widgetID);
+      fAC[iModule][iChannel] -> Connect("Toggled(Bool_t)", "FADC400", this, "SetAC(Bool_t)");
+      fAC[iModule][iChannel] -> Move(240, 9);
+      fCh[iModule][iChannel] -> AddFrame(fAC[iModule][iChannel]);
+      // == End of Activating Channel =============================================
 
       // == Start of Data saving mode =============================================
       fTextDSM = new TGLabel(fCh[iModule][iChannel], "Data saving mode");
-      fTextDSM -> Move(10, 10);
+      fTextDSM -> Move(10, 30);
       fDSM[iModule][iChannel] = new TGComboBox(fCh[iModule][iChannel], widgetID);
       fDSM[iModule][iChannel] -> AddEntry("Raw", 0);
       fDSM[iModule][iChannel] -> AddEntry("Smooth", 1);
       fDSM[iModule][iChannel] -> Connect("Selected(Int_t)", "FADC400", this, "SetDSM(Int_t)");
       fDSM[iModule][iChannel] -> Select(0);
-      fDSM[iModule][iChannel] -> MoveResize(185, 10, 70, 18);
+      fDSM[iModule][iChannel] -> MoveResize(185, 30, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fDSM[iModule][iChannel]);
       // == End of Data saving mode ===============================================
 
       // == Start of Input polarity ===============================================
       fTextIP = new TGLabel(fCh[iModule][iChannel], "Input polarity");
-      fTextIP -> Move(10, 35);
+      fTextIP -> Move(10, 51);
       fIP[iModule][iChannel] = new TGComboBox(fCh[iModule][iChannel], widgetID);
       fIP[iModule][iChannel] -> AddEntry("(-)", 0);
       fIP[iModule][iChannel] -> AddEntry("(+)", 1);
       fIP[iModule][iChannel] -> Connect("Selected(Int_t)", "FADC400", this, "SetIP(Int_t)");
       fIP[iModule][iChannel] -> Select(0);
-      fIP[iModule][iChannel] -> MoveResize(185, 35, 70, 18);
+      fIP[iModule][iChannel] -> MoveResize(185, 51, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fIP[iModule][iChannel]);
       // == End of Input polarity =================================================
 
       // == Start of Input delay ==================================================
       fTextID = new TGLabel(fCh[iModule][iChannel], "Input delay (0 ~ 40900) (ns)");
-      fTextID -> Move(10, 60);
+      fTextID -> Move(10, 72);
       fID[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 40900);
       fID[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetID(const Char_t *)");
-      fID[iModule][iChannel] -> MoveResize(185, 60, 70, 18);
+      fID[iModule][iChannel] -> MoveResize(185, 72, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fID[iModule][iChannel]);
       // == End of Input delay ====================================================
 
       // == Start of ADC Offset ===================================================
       fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC Offset (0 ~ 4095) (ns)");
-      fTextAO -> Move(10, 85);
+      fTextAO -> Move(10, 93);
       fAO[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 4095);
       fAO[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetAO(const Char_t *)");
-      fAO[iModule][iChannel] -> MoveResize(185, 85, 70, 18);
+      fAO[iModule][iChannel] -> MoveResize(185, 93, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fAO[iModule][iChannel]);
       // == End of ADC Offset =====================================================
 
       // == Start of Threshold ====================================================
       fTextThres = new TGLabel(fCh[iModule][iChannel], "Threshold (0 ~ 1023)");
-      fTextThres -> Move(10, 110);
+      fTextThres -> Move(10, 114);
       fThres[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 1023);
       fThres[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "FADC400", this, "SetThres(const Char_t *)");
-      fThres[iModule][iChannel] -> MoveResize(185, 110, 70, 18);
+      fThres[iModule][iChannel] -> MoveResize(185, 114, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fThres[iModule][iChannel]);
       // == End of Threshold ======================================================
 
@@ -459,6 +467,25 @@ void FADC400::SetSameChannelSetting(Bool_t value)
   fSettings.fUseSameChannelSetting[module] = value;
 }
 
+void FADC400::SetAC(Bool_t value)
+{
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "==================================" << endl;
+    cout << " SetAC module:" << module + 1;
+    cout << " channel:" << channel + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "==================================" << endl;
+  }
+  
+  // Setting parameter for Channel activating will be here
+}
+
 void FADC400::SetDSM(Int_t value)
 {
   TGComboBox *object = (TGComboBox *) gTQSender;
@@ -667,6 +694,7 @@ void FADC400::SetTriggerModeWidth(Bool_t value)
   fTMWidthOption[module][cgroup] -> SetEnabled(value);
   fTMWidthOption[module][cgroup] -> Select(0);
   fTMWidthThres[module][cgroup] -> SetEnabled(value);
+  fTMWidthThres[module][cgroup] -> SetFocus();
 
   fSettings.fValueTMWidth[module][cgroup] = value;
 }
@@ -777,7 +805,14 @@ void FADC400::SetTMCOption(Int_t value)
     for (Int_t option = 1; option < 3; option++) {
       fTMCountThres[module][cgroup][option] -> SetEnabled(kTRUE);
       fTMCountInterval[module][cgroup][option] -> SetEnabled(kTRUE);
+
+      fTMCountThres[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+      fTMCountThres[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+      fTMCountInterval[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][(option == 2 ? 1 : option + 1)], "SetFocus()");
+      fTMCountInterval[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][(option == 2 ? 1 : option + 1)], "SetFocus()");
     }
+
+    fTMCountThres[module][cgroup][1] -> SetFocus();
 
     fTMCountThres[module][cgroup][0] -> SetEnabled(kFALSE);
     fTMCountInterval[module][cgroup][0] -> SetEnabled(kFALSE);
@@ -786,11 +821,18 @@ void FADC400::SetTMCOption(Int_t value)
       if (option == mode) {
         fTMCountThres[module][cgroup][option] -> SetEnabled(kTRUE);
         fTMCountInterval[module][cgroup][option] -> SetEnabled(kTRUE);
+
+        fTMCountThres[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+        fTMCountThres[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+        fTMCountInterval[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][option], "SetFocus()");
+        fTMCountInterval[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][option], "SetFocus()");
       } else {
         fTMCountThres[module][cgroup][option] -> SetEnabled(kFALSE);
         fTMCountInterval[module][cgroup][option] -> SetEnabled(kFALSE);
       }
     }
+
+    fTMCountThres[module][cgroup][mode] -> SetFocus();
   }
 
   fSettings.fValueTMCountOption[module][cgroup] = mode;
