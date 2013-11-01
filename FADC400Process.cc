@@ -143,46 +143,45 @@ FADC400Process::FADC400Process(FADC400Settings settings)
         if (TMCOption < 3) {
           if (TMCOption == 0) {
             // Set pulse count threshold
-            kadc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
+            adc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
 
             // Set pulse count interval
-            kadc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
+            adc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
           } else if (TMCOption == 1) {
             // Set pulse count threshold
-            kadc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
-            kadc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
+            adc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
 
             // Set pulse count interval
-            kadc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
-            kadc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
+            adc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
           } else if (TMCOption == 2) {
             // Set pulse count threshold
-            kadc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
-            kadc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
+            adc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
 
             // Set pulse count interval
-            kadc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, 0);
-            kadc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
-            kadc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, 0);
+            adc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
+            adc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
           }
-
         } else {
           // Set pulse count threshold
-          kadc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
-          kadc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][1]); 
-          kadc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+          adc.FADC400write_PCTX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][0]); 
+          adc.FADC400write_PCTY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountThres[iModule][iCGroup][1]); 
+          adc.FADC400write_PCTXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
 
           // Set pulse count interval
-          kadc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
-          kadc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][1]);
-          kadc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
+          adc.FADC400write_PCIX(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][0]);
+          adc.FADC400write_PCIY(fNKUSB, fModuleID[iModule], groupIdx, settings.fValueTMCountInterval[iModule][iCGroup][1]);
+          adc.FADC400write_PCIXY(fNKUSB, fModuleID[iModule], groupIdx, 0);
         }
       }
     }
