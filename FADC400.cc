@@ -694,6 +694,7 @@ void FADC400::SetTriggerModeWidth(Bool_t value)
   fTMWidthOption[module][cgroup] -> SetEnabled(value);
   fTMWidthOption[module][cgroup] -> Select(0);
   fTMWidthThres[module][cgroup] -> SetEnabled(value);
+  fTMWidthThres[module][cgroup] -> SetFocus();
 
   fSettings.fValueTMWidth[module][cgroup] = value;
 }
@@ -804,7 +805,14 @@ void FADC400::SetTMCOption(Int_t value)
     for (Int_t option = 1; option < 3; option++) {
       fTMCountThres[module][cgroup][option] -> SetEnabled(kTRUE);
       fTMCountInterval[module][cgroup][option] -> SetEnabled(kTRUE);
+
+      fTMCountThres[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+      fTMCountThres[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+      fTMCountInterval[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][(option == 2 ? 1 : option + 1)], "SetFocus()");
+      fTMCountInterval[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][(option == 2 ? 1 : option + 1)], "SetFocus()");
     }
+
+    fTMCountThres[module][cgroup][1] -> SetFocus();
 
     fTMCountThres[module][cgroup][0] -> SetEnabled(kFALSE);
     fTMCountInterval[module][cgroup][0] -> SetEnabled(kFALSE);
@@ -813,11 +821,18 @@ void FADC400::SetTMCOption(Int_t value)
       if (option == mode) {
         fTMCountThres[module][cgroup][option] -> SetEnabled(kTRUE);
         fTMCountInterval[module][cgroup][option] -> SetEnabled(kTRUE);
+
+        fTMCountThres[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+        fTMCountThres[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountInterval[module][cgroup][option], "SetFocus()");
+        fTMCountInterval[module][cgroup][option] -> Connect("TabPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][option], "SetFocus()");
+        fTMCountInterval[module][cgroup][option] -> Connect("ReturnPressed()", "TGNumberEntryField", fTMCountThres[module][cgroup][option], "SetFocus()");
       } else {
         fTMCountThres[module][cgroup][option] -> SetEnabled(kFALSE);
         fTMCountInterval[module][cgroup][option] -> SetEnabled(kFALSE);
       }
     }
+
+    fTMCountThres[module][cgroup][mode] -> SetFocus();
   }
 
   fSettings.fValueTMCountOption[module][cgroup] = mode;
