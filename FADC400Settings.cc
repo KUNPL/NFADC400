@@ -21,6 +21,7 @@ void FADC400Settings::Initialize()
     fUseSameChannelSetting[iModule] = 0;
 
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fValueAC[iModule][iChannel] = 0;
       fValueDSM[iModule][iChannel] = 0;
       fValueIP[iModule][iChannel] = 0;
       fValueID[iModule][iChannel] = 0;
@@ -56,6 +57,7 @@ void FADC400Settings::UseSameModuleSetting()
   fIsActive[1] = fIsActive[0];
   
   if (fUseSameChannelSetting[0]) {
+    fValueAC[1][0] = fValueAC[0][0];
     fValueDSM[1][0] = fValueDSM[0][0];
     fValueIP[1][0] = fValueIP[0][0];
     fValueID[1][0] = fValueID[0][0];
@@ -67,6 +69,7 @@ void FADC400Settings::UseSameModuleSetting()
     UseSameChannelSetting(1);
   } else {
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fValueAC[1][iChannel] = fValueAC[0][iChannel];
       fValueDSM[1][iChannel] = fValueDSM[0][iChannel];
       fValueIP[1][iChannel] = fValueIP[0][iChannel];
       fValueID[1][iChannel] = fValueID[0][iChannel];
@@ -115,6 +118,7 @@ void FADC400Settings::UseSameModuleSetting()
 void FADC400Settings::UseSameChannelSetting(Int_t module)
 {
   for (Int_t iChannel = 1; iChannel < 4; iChannel++) {
+    fValueAC[module][iChannel] = fValueAC[module][0];
     fValueDSM[module][iChannel] = fValueDSM[module][0];
     fValueIP[module][iChannel] = fValueIP[module][0];
     fValueID[module][iChannel] = fValueID[module][0];
