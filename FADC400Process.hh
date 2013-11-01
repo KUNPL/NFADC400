@@ -5,7 +5,7 @@
 //                                 //
 //  Author: Genie Jhang            //
 // Contact: geniejhang@majimak.com //
-//    Date: 2013. 10. 29           //
+//    Date: 2013. 11. 01           //
 //                                 //
 /////////////////////////////////////
 
@@ -13,12 +13,28 @@
 #define __FADC400PROCESS_H_
 
 #include "FADC400Constants.hh"
+#include "FADC400Header.hh"
+
+class TFile;
+class TTree;
 
 class FADC400Process 
 {
   public:
+    FADC400Process(FADC400Settings);
+    ~FADC400Process();
 
   private:
+    void TakeData();
+    void SaveHeader();
+
+    Int_t fNKUSB;
+    Int_t fModuleID[2];
+    Int_t fActive[2];
+
+    TFile *outFile;
+    FADC400Header *header[2];
+    TTree *data[2][8];
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef _FADC400CONFIG_H_
-#define _FADC400CONFIG_H_
+#ifndef _FADC400CONSTANTS_H_
+#define _FADC400CONSTANTS_H_
 
 #define RL1   0x400  
 #define RL2   0x800  
