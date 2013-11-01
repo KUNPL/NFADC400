@@ -36,6 +36,7 @@ class FADC400 : public TGMainFrame
     void SetActive(Bool_t);
     void SetSameChannelSetting(Bool_t);
 
+    void SetAC(Bool_t);
     void SetDSM(Int_t);
     void SetIP(Int_t);
     void SetID(const Char_t *);
@@ -91,6 +92,10 @@ class FADC400 : public TGMainFrame
     TGLabel *fTextAddress;
     TGComboBox *fAddress[2];
     TGButton *fActive[2];
+
+    // Active Channel
+    TGLabel *fTextAC;
+    TGCheckButton *fAC[2][4];
 
     // Data saving mode
     TGLabel *fTextDSM;
