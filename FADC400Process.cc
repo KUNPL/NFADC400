@@ -278,12 +278,24 @@ void FADC400Process::SaveHeader()
 
 void FADC400Process::TakeData()
 {
+  UChar_t tPattern = 0;
+  UShort_t widthTrigger = 0;
+  UShort_t countTrigger = 0;
+  UShort_t triggerInCounts = 0;
+  UChar_t triggerTimeData[8] = {0};
+  ULong64_t triggerTime = 0;
+  UShort_t data = 0;
+
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
       if (settings.fValueAC[iModule][iChannel]) {
         data[iModule][iChannel] = new TTree(Form("mod%d_ch%d", iModule + 1, iChannel + 1), Form("Data from Channel %d of Module %d", iModule + 1, iChannel + 1));
         // branches are here for appropriate data structure
-        data[iModule][iChannel] -> Branch();
+        data[iModule][iChannel] -> Branch("widthTrigger", &widthTrigger, "widthTrigger/s");
+        data[iModule][iChannel] -> Branch("countTrigger", &countTrigger, "countTrigger/s");
+        data[iModule][iChannel] -> Branch("triggerInCounts", &tInCounts, "triggerInCounts/s");
+        data[iModule][iChannel] -> Branch("triggerTime", &triggerTime, "triggerTime/l");
+        data[iModule][iChannel] -> Branch("adc", &data, "adc/s");
       }
     }
   }
