@@ -25,16 +25,18 @@ class FADC400Process
     ~FADC400Process();
 
   private:
+    void Initialize();
     void TakeData();
     void SaveHeader();
 
     Int_t fNKUSB;
     Int_t fModuleID[2];
-    Int_t fActive[2];
+    Int_t fActiveModule[2];
+    Int_t fActiveChannel[2][4];
 
     TFile *outFile;
     FADC400Header *header[2];
-    TTree *data[2][8];
+    TTree *data[2][4];
 };
 
 #endif

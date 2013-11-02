@@ -20,6 +20,7 @@ class FADC400Header : public TNamed
     FADC400Header();
     ~FADC400Header();
 
+        void SetAC(Int_t channel, Bool_t value)       { fAC[channel] = value; }
         void SetDSM(Int_t channel, Bool_t value)      { fDSM[channel] = value; }
         void SetIP(Int_t channel, Bool_t value)       { fIP[channel] = value; }
         void SetID(Int_t channel, Int_t value)        { fID[channel] = value; }
@@ -27,6 +28,7 @@ class FADC400Header : public TNamed
         void SetThreshold(Int_t channel, Int_t value) { fThreshold[channel] = value; }
         void SetRL(Int_t channel, Int_t value)        { fThreshold[channel] = value; }
 
+      Bool_t GetAC(Int_t channel)        { return fAC[channel]; }
       Bool_t GetDSM(Int_t channel)       { return fDSM[channel]; }
       Bool_t GetIP(Int_t channel)        { return fIP[channel]; }
        Int_t GetID(Int_t channel)        { return fID[channel]; }
@@ -63,6 +65,7 @@ class FADC400Header : public TNamed
     Int_t fNumEvents;
 
     // Channels' Header
+    Bool_t fAC[4];
     Bool_t fDSM[4];
     Bool_t fIP[4];
     Int_t fID[4];

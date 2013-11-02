@@ -21,10 +21,12 @@
 
 FADC400Process::FADC400Process(FADC400Settings settings)
 {
-  for (Int_t iModule = 0; iModule < 2; iModule++) {
-    fActive[iModule] = settings.fIsActive[iModule];
+  Initialize();
 
-    if (fActive[iModule])
+  for (Int_t iModule = 0; iModule < 2; iModule++) {
+    fActiveModule[iModule] = settings.fIsActive[iModule];
+
+    if (fActiveModule[iModule])
       fAddress[iModule] = settings.fValueAddress[iModule];
   }
 
@@ -54,7 +56,7 @@ FADC400Process::FADC400Process(FADC400Settings settings)
 
   // Downlaod FPGA program into Xilinx for all 4 channels because of trigger lookup table
   for (Int_t iModule = 0; iModule < 2; iModule++) {
-    if (fActive[iModule]) {
+    if (fActiveModule[iModule]) {
       cout << " ======== Start Downloading FPGA program of Module " << iModule + 1 << "========" << endl;
       ULong_t d1;
       ULong_t da = 0xFADC0;
@@ -87,6 +89,8 @@ FADC400Process::FADC400Process(FADC400Settings settings)
       adc.FADC400reset(fNKUSB, fModuleID[iModule], 0);
 
       for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+        fActiveChannel[iModule][iChannel] = settings.fValueAC[iModule][iChannel];
+
         // Set data saving mode
         adc.FADC400write_DSM(fNKUSB, fModuleID[iModule], iChannel + 1, settings.fValueDSM[iModule][iChannel]); 
 
@@ -195,21 +199,92 @@ FADC400Process::~FADC400Process()
 {
 }
 
+void FADC400Process::Initialize()
+{
+  fNKUSB = 0;
+  outFile = NULL;
+
+  for (Int_t iModule = 0; iModule < 2; iModule++) {
+    fModuleID[iModule] = -1;
+    fActiveModule[iModule] = -1;
+
+    header[iModule] = NULL;
+
+    for (Int_t iChannel = 0; iChannel < 2; iChannel++) {
+      fActiveChannel[iModule][iChannel] = 0;
+      data[iModule][iChannel] = NULL;
+    }
+  }
+}
+
 void FADC400Process::SaveHeader()
 {
   for (Int_t iModule = 0; iModule < 2; iModule++) {
-    if (fActive[iModule]) {
+    if (fActiveModule[iModule]) {
       outFile -> cd();
 
       header[iModule] = new FADC400Header();
       header[iModule] -> SetName(Form("module%d", iModule));
 
-      // Reading the setting parameters from module register, fill them to the header.
-    } else
-      header[iModule] = NULL;
+      for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+        header[iModule] -> SetAC(iChannel, fActiveChannel[iModule][iChannel]);
+        header[iModule] -> SetDSM(iChannel, adc.FADC400read_DSM(fNKUSB, fModuleID[iModule], iChannel + 1));
+        header[iModule] -> SetIP(iChannel, adc.FADC400read_POL(fNKUSB, fModuleID[iModule], iChannel + 1));
+        header[iModule] -> SetID(iChannel, adc.FADC400read_DLY(fNKUSB, fModuleID[iModule], iChannel + 1));
+        header[iModule] -> SetAO(iChannel, adc.FADC400read_DAC(fNKUSB, fModuleID[iModule], iChannel + 1));
+        header[iModule] -> SetThreshold(iChannel, adc.FADC400read_THR(fNKUSB, fModuleID[iModule], iChannel + 1));
+        header[iModule] -> SetRL(iChannel, adc.FADC400read_RL(fNKUSB, fModuleID[iModule], iChannel + 1));
+      }
+
+      header[iModule] -> SetCLT(adc.FADC400read_TLT(fNKUSB, fModuleID[iModule]));
+
+      for (Int_t iCGroup = 0; iCGroup < 4; iCGroup++) {
+        ULong_t groupIdx = TMath::Power(3., iCGroup);
+
+        header[iModule] -> SetDT(iCGroup, adc.FADC400read_DT(fNKUSB, fModuleID[iModule], groupIdx));
+        header[iModule] -> SetCW(iCGroup, adc.FADC400read_CW(fNKUSB, fModuleID[iModule], groupIdx));
+
+        ULong_t triggerMode = adc.FADC400read_TM(fNKUSB, fModuleID[iModule], groupIdx);
+        Bool_t widthMode = ((triggerMode & 0x20) >> 5);
+        Int_t widthOption = ((triggerMode & 0x18) >> 3);
+        Bool_t countMode = ((triggerMode & 0x4) >> 2);
+        Int_t countOption = (triggerMode & 0x3);
+        header[iModule] -> SetTMWidth(iCGroup, widthMode);
+        header[iModule] -> SetTMWidthOption(iCGroup, widthOption);
+        header[iModule] -> SetTMWidthThreshold(iCGroup, adc.FADC400read_PWT(fNKUSB, fModuleID[iModule], groupIdx));
+        header[iModule] -> SetTMCount(iCGroup, countMode);
+        header[iModule] -> SetTMCountOption(iCGroup, countOption);
+        if (countOption == 0) {
+          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTXY(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIXY(fNKUSB, fModuleID[iModule], groupIdx));
+        } else if (countOption == 1) {
+          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
+        } else if (countOption == 2) {
+          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
+        } else {
+          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountThreshold(iCGroup, 1, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
+          header[iModule] -> SetTMCountInterval(iCGroup, 1, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
+        }
+      }
+
+      header[iModule] -> Write();
+    }
   }
 }
 
 void FADC400Process::TakeData()
 {
+  for (Int_t iModule = 0; iModule < 2; iModule++) {
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (settings.fValueAC[iModule][iChannel]) {
+        data[iModule][iChannel] = new TTree(Form("mod%d_ch%d", iModule + 1, iChannel + 1), Form("Data from Channel %d of Module %d", iModule + 1, iChannel + 1));
+        // branches are here for appropriate data structure
+        data[iModule][iChannel] -> Branch();
+      }
+    }
+  }
 }
