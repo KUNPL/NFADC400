@@ -11,6 +11,7 @@
 
 #include "FADC400Event.hh"
 
+ClassImp(FADC400Event);
 ClassImp(FADC400Event1);
 ClassImp(FADC400Event2);
 ClassImp(FADC400Event4);

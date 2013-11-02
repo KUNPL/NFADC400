@@ -15,402 +15,289 @@
 #include "TNamed.h"
 #include "FADC400Constants.hh"
 
-class FADC400Event1 : public TNamed
+class FADC400Event : public TNamed
 {
   public:
-    FADC400Event1() { Initialize(); };
-    virtual ~FADC400Event1() { Initialize(); };
+    FADC400Event() {};
+    virtual ~FADC400Event() {};
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetNumData(Int_t value)            { fNumData = value; }
+    void SetWidthTrigger(Short_t value)     { fWidthTrigger = value; }
+    void SetCountTrigger(Short_t value)     { fCountTrigger = value; }
+    void SetTriggerInCounts(Short_t value)  { fTriggerInCounts = value; }
+    void SetTriggerTime(ULong64_t value)    { fTriggerTime = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+      Int_t GetNumData()         { return fNumData; }
+    Short_t GetWidthTrigger()    { return fWidthTrigger; }
+    Short_t GetCountTrigger()    { return fCountTrigger; }
+    Short_t GetTriggerInCounts() { return fTriggerInCounts; }
+   Long64_t GetTriggerTime()     { return fTriggerTime; }
 
-  private:
     void Initialize()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
-
-      for (Int_t iADC = 0; iADC < RL1; iADC++)
-        adc[iADC] = 0;
+      fNumData = 0;
+      fWidthTrigger = 0;
+      fCountTrigger = 0;
+      fTriggerInCounts = 0;
+      fTriggerTime = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL1];
+  private:
+    Int_t fNumData;
+    Short_t fWidthTrigger;
+    Short_t fCountTrigger;
+    Short_t fTriggerInCounts;
+    ULong64_t fTriggerTime;
+
+  ClassDef(FADC400Event, 1);
+};
+
+class FADC400Event1 : public FADC400Event
+{
+  public:
+    FADC400Event1() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event1() { Initialize(); InitializeADC(); };
+
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
+
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
+
+  private:
+    void InitializeADC()
+    {
+      SetNumData(RL1);
+
+      for (Int_t iADC = 0; iADC < RL1; iADC++)
+        fAdc[iADC] = 0;
+    }
+
+    Short_t fAdc[RL1];
 
   ClassDef(FADC400Event1, 1);
 };
 
-class FADC400Event2 : public TNamed
+class FADC400Event2 : public FADC400Event
 {
   public:
-    FADC400Event2() { Initialize(); };
-    virtual ~FADC400Event2() { Initialize(); };
+    FADC400Event2() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event2() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL2);
 
       for (Int_t iADC = 0; iADC < RL2; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL2];
+    Short_t fAdc[RL2];
 
   ClassDef(FADC400Event2, 1);
 };
 
-class FADC400Event4 : public TNamed
+class FADC400Event4 : public FADC400Event
 {
   public:
-    FADC400Event4() { Initialize(); };
-    virtual ~FADC400Event4() { Initialize(); };
+    FADC400Event4() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event4() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL4);
 
       for (Int_t iADC = 0; iADC < RL4; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL4];
+    Short_t fAdc[RL4];
 
   ClassDef(FADC400Event4, 1);
 };
 
-class FADC400Event8 : public TNamed
+class FADC400Event8 : public FADC400Event
 {
   public:
-    FADC400Event8() { Initialize(); };
-    virtual ~FADC400Event8() { Initialize(); };
+    FADC400Event8() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event8() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL8);
 
       for (Int_t iADC = 0; iADC < RL8; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL8];
+    Short_t fAdc[RL8];
 
   ClassDef(FADC400Event8, 1);
 };
 
-class FADC400Event16 : public TNamed
+class FADC400Event16 : public FADC400Event
 {
   public:
-    FADC400Event16() { Initialize(); };
-    virtual ~FADC400Event16() { Initialize(); };
+    FADC400Event16() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event16() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL16);
 
       for (Int_t iADC = 0; iADC < RL16; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL16];
+    Short_t fAdc[RL16];
 
   ClassDef(FADC400Event16, 1);
 };
 
-class FADC400Event32 : public TNamed
+class FADC400Event32 : public FADC400Event
 {
   public:
-    FADC400Event32() { Initialize(); };
-    virtual ~FADC400Event32() { Initialize(); };
+    FADC400Event32() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event32() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL32);
 
       for (Int_t iADC = 0; iADC < RL32; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL32];
+    Short_t fAdc[RL32];
 
   ClassDef(FADC400Event32, 1);
 };
 
-class FADC400Event64 : public TNamed
+class FADC400Event64 : public FADC400Event
 {
   public:
-    FADC400Event64() { Initialize(); };
-    virtual ~FADC400Event64() { Initialize(); };
+    FADC400Event64() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event64() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL64);
 
       for (Int_t iADC = 0; iADC < RL64; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL64];
+    Short_t fAdc[RL64];
 
   ClassDef(FADC400Event64, 1);
 };
 
-class FADC400Event128 : public TNamed
+class FADC400Event128 : public FADC400Event
 {
   public:
-    FADC400Event128() { Initialize(); };
-    virtual ~FADC400Event128() { Initialize(); };
+    FADC400Event128() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event128() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL128);
 
       for (Int_t iADC = 0; iADC < RL128; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL128];
+    Short_t fAdc[RL128];
 
   ClassDef(FADC400Event128, 1);
 };
 
-class FADC400Event256 : public TNamed
+class FADC400Event256 : public FADC400Event
 {
   public:
-    FADC400Event256() { Initialize(); };
-    virtual ~FADC400Event256() { Initialize(); };
+    FADC400Event256() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event256() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL256);
 
       for (Int_t iADC = 0; iADC < RL256; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL256];
+    Short_t fAdc[RL256];
 
   ClassDef(FADC400Event256, 1);
 };
 
-class FADC400Event512 : public TNamed
+class FADC400Event512 : public FADC400Event
 {
   public:
-    FADC400Event512() { Initialize(); };
-    virtual ~FADC400Event512() { Initialize(); };
+    FADC400Event512() { Initialize(); InitializeADC(); };
+    virtual ~FADC400Event512() { Initialize(); InitializeADC(); };
 
-    void SetWidthTrigger(Short_t value)     { widthTrigger = value; }
-    void SetCountTrigger(Short_t value)     { countTrigger = value; }
-    void SetTriggerInCounts(Short_t value)  { triggerInCounts = value; }
-    void SetTriggerTime(ULong64_t value)    { triggerTime = value; }
-    void SetADC(Int_t index, Short_t value) { adc[index] = value; }
+    void SetADC(Int_t index, Short_t value) { fAdc[index] = value; }
 
-    Short_t  GetWidthTrigger()    { return widthTrigger; }
-    Short_t  GetCountTrigger()    { return countTrigger; }
-    Short_t  GetTriggerInCounts() { return triggerInCounts; }
-   Long64_t  GetTriggerTime()     { return triggerTime; }
-    Short_t *GetADC()             { return adc; }
-    Short_t  GetADC(Int_t index)  { return adc[index]; }
+    Short_t *GetADC()             { return fAdc; }
+    Short_t  GetADC(Int_t index)  { return fAdc[index]; }
 
   private:
-    void Initialize()
+    void InitializeADC()
     {
-      widthTrigger = 0;
-      countTrigger = 0;
-      triggerInCounts = 0;
-      triggerTime = 0;
+      SetNumData(RL512);
 
       for (Int_t iADC = 0; iADC < RL512; iADC++)
-        adc[iADC] = 0;
+        fAdc[iADC] = 0;
     }
 
-    Short_t widthTrigger;
-    Short_t countTrigger;
-    Short_t triggerInCounts;
-    ULong64_t triggerTime;
-    Short_t adc[RL512];
+    Short_t fAdc[RL512];
 
   ClassDef(FADC400Event512, 1);
 };
