@@ -6,13 +6,7 @@ NK_CFLAGS = -DNKROOT -I/$(NKHOME)/include
 NK_LIBS = -L/$(NKHOME)/lib  -lNotice6UVME_root -lNoticeTDC64M_root
 
 UNAME = $(shell uname -rs | cut -d. -f 1)
-MAVERICKS = Darwin 13
-ifeq ($(UNAME),$(MAVERICKS))
-  CXX = g++ -stdlib=libstdc++
-else
-  CXX = g++
-endif
-
+CXX = g++
 
 PREFIX = FADC400
 TARGET = $(PREFIX)
