@@ -1,14 +1,7 @@
 ROOT_CFLAGS = $(shell root-config --cflags)
 ROOT_LIBS = $(shell root-config --libs)
 
-UNAME = $(shell uname -rs | cut -d. -f 1)
-MAVERICKS = Darwin 13
-ifeq ($(UNAME),$(MAVERICKS))
-  CXX = g++ -stdlib=libstdc++
-else
-  CXX = g++
-endif
-
+CXX = g++
 
 PREFIX = FADC400
 TARGET = lib$(PREFIX)
@@ -31,7 +24,7 @@ $(LINKDEF):
 	@echo "#ifdef __CINT__" > LinkdefHeader
 	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 != "FADC400Constants") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
 	@echo "#endif" > LinkdefFooter
-	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFooter > $@
+	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
 
 clean:
