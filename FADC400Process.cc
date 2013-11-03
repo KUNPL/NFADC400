@@ -10,14 +10,18 @@
 /////////////////////////////////////
 
 #include "FADC400Process.hh"
+#include "FADC400Header.hh"
+#include "FADC400Event.hh"
 
 #include "TString.h"
 #include "TSystem.h"
 #include "Riostream.h"
 #include "TFile.h"
-#include "TTree.h"
 #include "TMath.h"
 #include "TDatime.h"
+#include "TClonesArray.h"
+
+#include "NoticeFADC400.h"
 
 FADC400Process::FADC400Process(FADC400Settings settings)
 {
@@ -32,7 +36,7 @@ FADC400Process::FADC400Process(FADC400Settings settings)
 
   TDatime date; 
   TString filename = Form("FADC400_%d_%d.root", date.GetDate(), date.GetTime);
-  outFile = new TFile(filename.Data(), "recreate");
+  fOutFile = new TFile(filename.Data(), "recreate");
 
   // get NKHOME enviernment
   TString mypath = gSystem -> Getenv("NKHOME");
@@ -202,101 +206,531 @@ FADC400Process::~FADC400Process()
 void FADC400Process::Initialize()
 {
   fNKUSB = 0;
-  outFile = NULL;
+  fOutFile = NULL;
 
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     fModuleID[iModule] = -1;
     fActiveModule[iModule] = -1;
 
-    header[iModule] = NULL;
+    fHeader[iModule] = NULL;
 
     for (Int_t iChannel = 0; iChannel < 2; iChannel++) {
       fActiveChannel[iModule][iChannel] = 0;
-      data[iModule][iChannel] = NULL;
+      fEvent[iModule][iChannel] = NULL;
     }
   }
 }
 
 void FADC400Process::SaveHeader()
 {
+  cout << " ======== Start writing header ========" << endl;
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     if (fActiveModule[iModule]) {
-      outFile -> cd();
+      fOutFile -> cd();
 
-      header[iModule] = new FADC400Header();
-      header[iModule] -> SetName(Form("module%d", iModule));
+      fHeader[iModule] = new FADC400Header();
+      fHeader[iModule] -> SetName(Form("module%d", iModule));
+      fHeader[iModule] -> SetNumEvents(settings.fValueNumEvents);
 
       for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
-        header[iModule] -> SetAC(iChannel, fActiveChannel[iModule][iChannel]);
-        header[iModule] -> SetDSM(iChannel, adc.FADC400read_DSM(fNKUSB, fModuleID[iModule], iChannel + 1));
-        header[iModule] -> SetIP(iChannel, adc.FADC400read_POL(fNKUSB, fModuleID[iModule], iChannel + 1));
-        header[iModule] -> SetID(iChannel, adc.FADC400read_DLY(fNKUSB, fModuleID[iModule], iChannel + 1));
-        header[iModule] -> SetAO(iChannel, adc.FADC400read_DAC(fNKUSB, fModuleID[iModule], iChannel + 1));
-        header[iModule] -> SetThreshold(iChannel, adc.FADC400read_THR(fNKUSB, fModuleID[iModule], iChannel + 1));
-        header[iModule] -> SetRL(iChannel, adc.FADC400read_RL(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetAC(iChannel, fActiveChannel[iModule][iChannel]);
+        fHeader[iModule] -> SetDSM(iChannel, adc.FADC400read_DSM(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetIP(iChannel, adc.FADC400read_POL(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetID(iChannel, adc.FADC400read_DLY(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetAO(iChannel, adc.FADC400read_DAC(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetThreshold(iChannel, adc.FADC400read_THR(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetRL(iChannel, adc.FADC400read_RL(fNKUSB, fModuleID[iModule], iChannel + 1));
       }
 
-      header[iModule] -> SetCLT(adc.FADC400read_TLT(fNKUSB, fModuleID[iModule]));
+      fHeader[iModule] -> SetCLT(adc.FADC400read_TLT(fNKUSB, fModuleID[iModule]));
 
       for (Int_t iCGroup = 0; iCGroup < 4; iCGroup++) {
         ULong_t groupIdx = TMath::Power(3., iCGroup);
 
-        header[iModule] -> SetDT(iCGroup, adc.FADC400read_DT(fNKUSB, fModuleID[iModule], groupIdx));
-        header[iModule] -> SetCW(iCGroup, adc.FADC400read_CW(fNKUSB, fModuleID[iModule], groupIdx));
+        fHeader[iModule] -> SetDT(iCGroup, adc.FADC400read_DT(fNKUSB, fModuleID[iModule], groupIdx));
+        fHeader[iModule] -> SetCW(iCGroup, adc.FADC400read_CW(fNKUSB, fModuleID[iModule], groupIdx));
 
         ULong_t triggerMode = adc.FADC400read_TM(fNKUSB, fModuleID[iModule], groupIdx);
         Bool_t widthMode = ((triggerMode & 0x20) >> 5);
         Int_t widthOption = ((triggerMode & 0x18) >> 3);
         Bool_t countMode = ((triggerMode & 0x4) >> 2);
         Int_t countOption = (triggerMode & 0x3);
-        header[iModule] -> SetTMWidth(iCGroup, widthMode);
-        header[iModule] -> SetTMWidthOption(iCGroup, widthOption);
-        header[iModule] -> SetTMWidthThreshold(iCGroup, adc.FADC400read_PWT(fNKUSB, fModuleID[iModule], groupIdx));
-        header[iModule] -> SetTMCount(iCGroup, countMode);
-        header[iModule] -> SetTMCountOption(iCGroup, countOption);
+        fHeader[iModule] -> SetTMWidth(iCGroup, widthMode);
+        fHeader[iModule] -> SetTMWidthOption(iCGroup, widthOption);
+        fHeader[iModule] -> SetTMWidthThreshold(iCGroup, adc.FADC400read_PWT(fNKUSB, fModuleID[iModule], groupIdx));
+        fHeader[iModule] -> SetTMCount(iCGroup, countMode);
+        fHeader[iModule] -> SetTMCountOption(iCGroup, countOption);
         if (countOption == 0) {
-          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTXY(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIXY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTXY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIXY(fNKUSB, fModuleID[iModule], groupIdx));
         } else if (countOption == 1) {
-          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
         } else if (countOption == 2) {
-          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
         } else {
-          header[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountThreshold(iCGroup, 1, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
-          header[iModule] -> SetTMCountInterval(iCGroup, 1, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountThreshold(iCGroup, 0, adc.FADC400read_PCTX(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountInterval(iCGroup, 0, adc.FADC400read_PCIX(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountThreshold(iCGroup, 1, adc.FADC400read_PCTY(fNKUSB, fModuleID[iModule], groupIdx));
+          fHeader[iModule] -> SetTMCountInterval(iCGroup, 1, adc.FADC400read_PCIY(fNKUSB, fModuleID[iModule], groupIdx));
         }
       }
 
-      header[iModule] -> Write();
+      fHeader[iModule] -> Write();
     }
   }
+  cout << " ========= End writing header =========" << endl;
 }
 
 void FADC400Process::TakeData()
 {
-  UChar_t tPattern = 0;
-  UShort_t widthTrigger = 0;
-  UShort_t countTrigger = 0;
-  UShort_t triggerInCounts = 0;
-  UChar_t triggerTimeData[8] = {0};
-  ULong64_t triggerTime = 0;
-  UShort_t data = 0;
+  cout << " ======== Start taking data ========" << endl;
+
+  Bool_t channelFlag[2][4] = 0;
 
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
-      if (settings.fValueAC[iModule][iChannel]) {
-        data[iModule][iChannel] = new TTree(Form("mod%d_ch%d", iModule + 1, iChannel + 1), Form("Data from Channel %d of Module %d", iModule + 1, iChannel + 1));
-        // branches are here for appropriate data structure
-        data[iModule][iChannel] -> Branch("widthTrigger", &widthTrigger, "widthTrigger/s");
-        data[iModule][iChannel] -> Branch("countTrigger", &countTrigger, "countTrigger/s");
-        data[iModule][iChannel] -> Branch("triggerInCounts", &tInCounts, "triggerInCounts/s");
-        data[iModule][iChannel] -> Branch("triggerTime", &triggerTime, "triggerTime/l");
-        data[iModule][iChannel] -> Branch("adc", &data, "adc/s");
+      if (fActiveChannel[iModule][iChannel]) {
+        if (fActiveModule[iModule])
+          channelFlag[iModule][iChannel] = 1;
+
+        Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+        fEvent[iModule][iChannel] = new TClonesArray(Form("FADC400Event%d", recordingLength), fHeader[iModule] -> GetNumEvents());
+        adc.FADC400startL(fNKUSB, fModuleID[iModule], iChannel + 1); 
+        adc.FADC400startH(fNKUSB, fModuleID[iModule], iChannel + 1); 
       }
     }
+  }
+
+  Int_t bufferNum[2][4] = {0};
+  Int_t dataPoint[2][4] = {0};
+  Int_t isFill[2][4];
+  for (Int_t iModule = 0; iModule < 2; iModule++) {
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      isFill[iModule][iChannel] = 1;
+      fEventNum[iModule][iChannel] = 0;
+    }
+  }
+
+  Bool_t overallFlag = 1;
+  while (overallFlag) {
+    Bool_t check = 0;
+    for (Int_t iModule = 0; iModule < 2; iModule++)
+      for (Int_t iChannel = 0; iChannel < 4; iChannel++)
+        check = (check | channelFlag[iModule][iChannel]);
+    overallFlag = check;
+
+    for (Int_t iModule = 0; iModule < 2; iModule++) {
+      for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+        if (channelFlag[iModule][iChannel]) {
+          if (bufferNum[iModule][iChannel] == 0)
+            isFill[iModule][iChannel] = !(adc.FADC400_RunL(fNKUSB, fModuleID[iModule], iChannel + 1));
+          else if (bufferNum[iModule][iChannel] == 1)
+            isFill[iModule][iChannel] = !(adc.FADC400_RunH(fNKUSB, fModuleID[iModule], iChannel + 1));
+        }
+      }
+    }
+
+    for (Int_t iModule = 0; iModule < 2; iModule++) {
+      for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+        if (channelFlag[iModule][iChannel] && isFill[iModule][iChannel]) {
+          Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+          switch (recordingLength) {
+            case 1: DataRL1(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 2: DataRL2(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 4: DataRL4(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 8: DataRL8(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 16: DataRL16(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 32: DataRL32(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 64: DataRL64(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 128: DataRL128(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 256: DataRL256(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            case 512: DataRL512(iModule, iChannel, bufferNum[iModule][iChannel]); break;
+            default: break;
+          }
+
+          if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+            channelFlag[iModule][iChannel] = 0;
+          else {
+            if (bufferNum[iModule][iChannel] == 0) {
+              bufferNum[iModule][iChannel] = 1;
+              adc.FADC400startL(fNKUSB, fModuleID[iModule], iChannel + 1); 
+            } else if (bufferNum[iModule][iChannel] == 1) {
+              bufferNum[iModule][iChannel] = 0;
+              adc.FADC400startH(fNKUSB, fModuleID[iModule], iChannel + 1); 
+            }
+          }
+        }
+      }
+    }
+  }
+
+  for (Int_t iModule = 0; iModule < 2; iModule++)
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++)
+      if (fActiveChannel[iModule][iChannel])
+        fEvent[iModule][iChannel] -> Write();
+
+  fOutFile -> Write();
+  cout << " ========= End taking data =========" << endl;
+}
+
+void FADC400Process::DataRL1(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event1 *event = (FADC400Event1 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL1] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL1; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL2(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event2 *event = (FADC400Event2 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL2] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL2; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL4(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event4 *event = (FADC400Event4 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL4] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL4; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL8(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event8 *event = (FADC400Event8 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL8] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL8; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+ 
+void FADC400Process::DataRL16(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event16 *event = (FADC400Event16 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL16] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL16; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL32(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event32 *event = (FADC400Event32 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL32] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL32; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+ 
+void FADC400Process::DataRL64(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event64 *event = (FADC400Event64 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL64] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL64; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL128(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event128 *event = (FADC400Event128 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL128] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL128; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL256(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event256 *event = (FADC400Event256 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL256] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL256; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
+  }
+}
+
+void FADC400Process::DataRL512(Int_t iModule, Int_t iChannel, Int_t bufferNumber) {
+  Int_t recordingLength = fHeader[iModule] -> GetRL(iChannel);
+  Int_t numEvents = 512/recordingLength;
+  for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
+    FADC400Event512 *event = (FADC400Event512 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    Char_t tTimeChar[8];
+    adc.FADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+
+    ULong64_t tTime = 0;
+    for (Int_t iBit = 0; iBit < 8; iBit++)
+      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+
+    event -> SetTriggerTime(tTime);
+
+    Char_t tPattern;
+    tPattern = adc.FADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+
+    event -> SetWidthTrigger((tPattern & 0x80));
+    event -> SetCountTrigger((tPattern & 0x40);)
+    event -> SetTriggerInCounts((tPattern & 0x1F);)
+
+    UShort_t data[RL512] = {0};
+    adc.FADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+
+    for (Int_t iData = 0; iData < RL512; iData++)
+      event -> SetADC(iData, (data[iData] & 0x3FF));
+
+    event = NULL;
+
+    fEventNum[iModule][iChannel]++;
+    if (fEventNum[iModule][iChannel] >= header[iModule] -> GetNumEvents())
+      break;
   }
 }

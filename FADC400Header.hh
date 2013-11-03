@@ -59,6 +59,9 @@ class FADC400Header : public TNamed
        Int_t GetTMCountThreshold(Int_t cgroup, Int_t option) { return fTMCountThreshold[cgroup][option]; }
        Int_t GetTMCountInterval(Int_t cgroup, Int_t option)  { return fTMCountInterval[cgroup][option]; }
 
+        void SetNumEvents(Int_t value) { fNumEvents = value; }
+       Int_t GetNumEvents()            { return fNumEvents; }
+
   private:
     void Initialize();
 

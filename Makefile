@@ -1,9 +1,9 @@
 ROOT_CFLAGS = $(shell root-config --cflags)
 ROOT_GLIBS = $(shell root-config --glibs)
 
-# The lines below are uncommented after finishing development.
-# NK_CFLAGS = -DNKROOT -I/$(NKHOME)/include
-# NK_LIBS = -L/$(NKHOME)/lib  -lNotice6UVME_root -lNoticeTDC64M_root
+#The lines below are uncommented after finishing development.
+NK_CFLAGS = -DNKROOT -I/$(NKHOME)/include
+NK_LIBS = -L/$(NKHOME)/lib  -lNotice6UVME_root -lNoticeTDC64M_root
 
 UNAME = $(shell uname -rs | cut -d. -f 1)
 MAVERICKS = Darwin 13
@@ -33,9 +33,9 @@ $(DICT): $(HEADER) $(LINKDEF)
 $(LINKDEF):
 	@echo "" > LinkdefSpace
 	@echo "#ifdef __CINT__" > LinkdefHeader
-	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 == "FADC400") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
+	@echo "#pragma link C++ class FADC400+;" > LinkdefBody
 	@echo "#endif" > LinkdefFooter
-	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFooter > $@
+	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
 
 clean:

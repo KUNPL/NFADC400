@@ -21,13 +21,11 @@ class FADC400Event : public TNamed
     FADC400Event() {};
     virtual ~FADC400Event() {};
 
-    void SetNumData(Int_t value)            { fNumData = value; }
     void SetWidthTrigger(Short_t value)     { fWidthTrigger = value; }
     void SetCountTrigger(Short_t value)     { fCountTrigger = value; }
     void SetTriggerInCounts(Short_t value)  { fTriggerInCounts = value; }
     void SetTriggerTime(ULong64_t value)    { fTriggerTime = value; }
 
-      Int_t GetNumData()         { return fNumData; }
     Short_t GetWidthTrigger()    { return fWidthTrigger; }
     Short_t GetCountTrigger()    { return fCountTrigger; }
     Short_t GetTriggerInCounts() { return fTriggerInCounts; }
@@ -35,7 +33,6 @@ class FADC400Event : public TNamed
 
     void Initialize()
     {
-      fNumData = 0;
       fWidthTrigger = 0;
       fCountTrigger = 0;
       fTriggerInCounts = 0;
@@ -43,7 +40,6 @@ class FADC400Event : public TNamed
     }
 
   private:
-    Int_t fNumData;
     Short_t fWidthTrigger;
     Short_t fCountTrigger;
     Short_t fTriggerInCounts;
