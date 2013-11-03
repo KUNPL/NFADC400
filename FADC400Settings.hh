@@ -33,7 +33,7 @@ class FADC400Settings
     Int_t fValueAO[2][4];
     Int_t fValueThres[2][4];
     Int_t fValueRL[2][4];
-    Int_t fValueCLT[2];
+    Bool_t fValueCLT[2];
     Bool_t fUseSameCGroupSetting[2];
     Int_t fValueDT[2][2];
     Int_t fValueCW[2][2];
