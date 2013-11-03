@@ -483,7 +483,7 @@ void FADC400::SetAC(Bool_t value)
     cout << "==================================" << endl;
   }
   
-  // Setting parameter for Channel activating will be here
+  fSettings.fValueAC[module][channel] = value;
 }
 
 void FADC400::SetDSM(Int_t value)
@@ -1086,6 +1086,11 @@ void FADC400::SetSettingsToUI()
       fSameChannelSettingButton[iModule] -> SetState(kButtonUp, kTRUE);
 
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (fSettings.fValueAC[iModule][iChannel])
+        fAC[iModule][iChannel] -> SetState(kButtonDown, kTRUE);
+      else
+        fAC[iModule][iChannel] -> SetState(kButtonUp, kTRUE);
+
       fDSM[iModule][iChannel] -> Select(fSettings.fValueDSM[iModule][iChannel]);
       fIP[iModule][iChannel] -> Select(fSettings.fValueIP[iModule][iChannel]);
       fID[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueID[iModule][iChannel]), kFALSE);

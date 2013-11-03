@@ -26,6 +26,7 @@ class FADC400Settings
     Int_t fValueAddress[2];
     Bool_t fIsActive[2];
     Bool_t fUseSameChannelSetting[2];
+    Bool_t fValueAC[2][4];
     Bool_t fValueDSM[2][4];
     Bool_t fValueIP[2][4];
     Int_t fValueID[2][4];
