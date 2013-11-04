@@ -1,6 +1,6 @@
 /////////////////////////////////////
 //                                 //
-//        FADC400 module GUI       //
+//       NFADC400 module GUI       //
 //    Event Data Container Class   //
 //                                 //
 //  Author: Genie Jhang            //
@@ -9,16 +9,19 @@
 //                                 //
 /////////////////////////////////////
 
-#include "FADC400Event.hh"
+#include "NFADC400Event.hh"
 
-ClassImp(FADC400Event);
-ClassImp(FADC400Event1);
-ClassImp(FADC400Event2);
-ClassImp(FADC400Event4);
-ClassImp(FADC400Event8);
-ClassImp(FADC400Event16);
-ClassImp(FADC400Event32);
-ClassImp(FADC400Event64);
-ClassImp(FADC400Event128);
-ClassImp(FADC400Event256);
-ClassImp(FADC400Event512);
+ClassImp(NFADC400Event);
+ClassImp(NFADC400Event1);
+ClassImp(NFADC400Event2);
+ClassImp(NFADC400Event4);
+ClassImp(NFADC400Event8);
+ClassImp(NFADC400Event16);
+ClassImp(NFADC400Event32);
+ClassImp(NFADC400Event64);
+ClassImp(NFADC400Event128);
+ClassImp(NFADC400Event256);
+ClassImp(NFADC400Event512);
+ClassImp(NFADC400Event1024);
+ClassImp(NFADC400Event2048);
+ClassImp(NFADC400Event4096);
