@@ -21,11 +21,13 @@ class FADC400Event : public TNamed
     FADC400Event() {};
     virtual ~FADC400Event() {};
 
+    void SetNumData(Int_t value)            { fNumData = value; }
     void SetWidthTrigger(Short_t value)     { fWidthTrigger = value; }
     void SetCountTrigger(Short_t value)     { fCountTrigger = value; }
     void SetTriggerInCounts(Short_t value)  { fTriggerInCounts = value; }
     void SetTriggerTime(ULong64_t value)    { fTriggerTime = value; }
 
+      Int_t GetNumData()         { return fNumData; }
     Short_t GetWidthTrigger()    { return fWidthTrigger; }
     Short_t GetCountTrigger()    { return fCountTrigger; }
     Short_t GetTriggerInCounts() { return fTriggerInCounts; }
@@ -33,6 +35,7 @@ class FADC400Event : public TNamed
 
     void Initialize()
     {
+      fNumData = 0;
       fWidthTrigger = 0;
       fCountTrigger = 0;
       fTriggerInCounts = 0;
@@ -40,6 +43,7 @@ class FADC400Event : public TNamed
     }
 
   private:
+      Int_t fNumData;
     Short_t fWidthTrigger;
     Short_t fCountTrigger;
     Short_t fTriggerInCounts;
@@ -62,6 +66,8 @@ class FADC400Event1 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL1);
+
       for (Int_t iADC = 0; iADC < RL1; iADC++)
         fAdc[iADC] = 0;
     }
@@ -85,7 +91,9 @@ class FADC400Event2 : public FADC400Event
   private:
     void InitializeADC()
     {
-      for (Int_t iADC = 0; iADC < RL4; iADC++)
+      SetNumData(RL2);
+
+      for (Int_t iADC = 0; iADC < RL2; iADC++)
         fAdc[iADC] = 0;
     }
 
@@ -108,6 +116,8 @@ class FADC400Event4 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL4);
+
       for (Int_t iADC = 0; iADC < RL4; iADC++)
         fAdc[iADC] = 0;
     }
@@ -131,6 +141,8 @@ class FADC400Event8 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL8);
+
       for (Int_t iADC = 0; iADC < RL8; iADC++)
         fAdc[iADC] = 0;
     }
@@ -154,6 +166,8 @@ class FADC400Event16 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL16);
+
       for (Int_t iADC = 0; iADC < RL16; iADC++)
         fAdc[iADC] = 0;
     }
@@ -177,6 +191,8 @@ class FADC400Event32 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL32);
+
       for (Int_t iADC = 0; iADC < RL32; iADC++)
         fAdc[iADC] = 0;
     }
@@ -200,6 +216,8 @@ class FADC400Event64 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL64);
+
       for (Int_t iADC = 0; iADC < RL64; iADC++)
         fAdc[iADC] = 0;
     }
@@ -223,6 +241,8 @@ class FADC400Event128 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL128);
+
       for (Int_t iADC = 0; iADC < RL128; iADC++)
         fAdc[iADC] = 0;
     }
@@ -246,6 +266,8 @@ class FADC400Event256 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL256);
+
       for (Int_t iADC = 0; iADC < RL256; iADC++)
         fAdc[iADC] = 0;
     }
@@ -269,6 +291,8 @@ class FADC400Event512 : public FADC400Event
   private:
     void InitializeADC()
     {
+      SetNumData(RL512);
+
       for (Int_t iADC = 0; iADC < RL512; iADC++)
         fAdc[iADC] = 0;
     }
