@@ -56,10 +56,8 @@ class NFADC400Header : public TNamed
        Int_t GetDT(Int_t channel)               { return fDT[channel]; }
        Int_t GetCW(Int_t channel)               { return fCW[channel]; }
       Bool_t GetTMWidth(Int_t channel)          { return fTMWidth[channel]; }
-       Int_t GetTMWidthOption(Int_t channel)    { return fTMWidthOption[channel]; }
     Double_t GetTMWidthThreshold(Int_t channel) { return fTMWidthThreshold[channel]; }
       Bool_t GetTMCount(Int_t channel)          { return fTMCount[channel]; }
-       Int_t GetTMCountOption(Int_t channel)    { return fTMCountOption[channel]; }
        Int_t GetTMCountThreshold(Int_t channel) { return fTMCountThreshold[channel]; }
        Int_t GetTMCountInterval(Int_t channel)  { return fTMCountInterval[channel]; }
 
