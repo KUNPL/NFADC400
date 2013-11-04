@@ -30,6 +30,7 @@ class NFADC400Settings
     Int_t fValueRL[2];
 
     Bool_t fUseSameChannelSetting[2];
+    Bool_t fValueAC[2][4];
     Bool_t fValueIP[2][4];
     Int_t fValueID[2][4];
     Int_t fValueAO[2][4];
