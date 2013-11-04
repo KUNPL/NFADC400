@@ -529,7 +529,7 @@ void NFADC400::SetIAG(const Char_t *value)
     cout << "====================================" << endl;
   }
 
-//  fSettings.fValueIAG[module][channel] = atoi(value);
+  fSettings.fValueIAG[module][channel] = atoi(value);
 }
 
 void NFADC400::SetRL(Int_t value)
@@ -544,7 +544,76 @@ void NFADC400::SetRL(Int_t value)
     cout << "=====================================" << endl;
   }
 
-//  fSettings.fValueRL[module] = value;
+  fSettings.fValueRL[module] = value;
+}
+
+void NFADC400::SetCLT(Int_t value)
+{
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t module = object -> WidgetId();
+
+  if (fIsDebug) {
+    cout << "=========================" << endl;
+    cout << " SetCLT module:" << module + 1;
+    cout << " is " << ( value ? "OR!" : "AND!" ) << endl;
+    cout << "=========================" << endl;
+  }
+
+  if (value == 0)
+    fTextCLT[module] -> SetText("When trigger signals from all the channels coincide.");
+  else
+    fTextCLT[module] -> SetText("Whenever a trigger signal exists from single channel.");
+
+  fSettings.fValueCLT[module] = value;
+}
+
+void NFADC400::SetTOW(const Char_t * value)
+{
+  TGNumberEntryField *object = (TGNumberEntryField *) gTQSender;
+  Int_t module = object -> WidgetId();
+
+  if (fIsDebug) {
+    cout << "==========================" << endl;
+    cout << " SetTOW module:" << module + 1;
+    cout << " is " << atoi(value) << "!" << endl;
+    cout << "==========================" << endl;
+  }
+
+  fSettings.fValueTOW[module] = atoi(value);
+}
+
+void NFADC400::SetTDC(Int_t value)
+{
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t module = object -> WidgetId();
+
+  if (fIsDebug) {
+    cout << "===================================" << endl;
+    cout << " SetTDC module:" << module + 1;
+    cout << " is " << ( value ? "Disabled!" : "Enabled!" ) << endl;
+    cout << "===================================" << endl;
+  }
+
+  fSettings.fValueTDC[module] = value;
+}
+
+void NFADC400::SetSameChannelTriggerSetting(Bool_t value)
+{
+  TGCheckButton *object = (TGCheckButton *) gTQSender;
+  Int_t module = object -> WidgetId();
+
+  if (fIsDebug) {
+    cout << "================================================" << endl;
+    cout << " SetSameChannelTriggerSetting module: " << module + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "================================================" << endl;
+  }
+
+  for (Int_t channel = 1; channel < 4; channel++)
+    fTMTab[module] -> SetEnabled(channel, !value);
+  fTMTab[module] -> SetTab(0, kFALSE);
+
+  fSettings.fUseSameChannelTriggerSetting[module] = value;
 }
 
 void NFADC400::SetThres(const Char_t *value)
@@ -602,75 +671,6 @@ void NFADC400::SetCW(const Char_t *value)
   }
 
   fSettings.fValueCW[module][channel] = atoi(value);
-}
-
-void NFADC400::SetCLT(Int_t value)
-{
-  TGComboBox *object = (TGComboBox *) gTQSender;
-  Int_t module = object -> WidgetId();
-
-  if (fIsDebug) {
-    cout << "=========================" << endl;
-    cout << " SetCLT module:" << module + 1;
-    cout << " is " << ( value ? "OR!" : "AND!" ) << endl;
-    cout << "=========================" << endl;
-  }
-
-  if (value == 0)
-    fTextCLT[module] -> SetText("When trigger signals from all the channels coincide.");
-  else
-    fTextCLT[module] -> SetText("Whenever a trigger signal exists from single channel.");
-
-  fSettings.fValueCLT[module] = value;
-}
-
-void NFADC400::SetTOW(const Char_t * value)
-{
-  TGNumberEntryField *object = (TGNumberEntryField *) gTQSender;
-  Int_t module = object -> WidgetId();
-
-  if (fIsDebug) {
-    cout << "==========================" << endl;
-    cout << " SetTOW module:" << module + 1;
-    cout << " is " << atoi(value) << "!" << endl;
-    cout << "==========================" << endl;
-  }
-
-//  fSettings.fValueTOW[module] = atoi(value);
-}
-
-void NFADC400::SetTDC(Int_t value)
-{
-  TGComboBox *object = (TGComboBox *) gTQSender;
-  Int_t module = object -> WidgetId();
-
-  if (fIsDebug) {
-    cout << "===================================" << endl;
-    cout << " SetTDC module:" << module + 1;
-    cout << " is " << ( value ? "Disabled!" : "Enabled!" ) << endl;
-    cout << "===================================" << endl;
-  }
-
-//  fSettings.fValueTOW[module] = value;
-}
-
-void NFADC400::SetSameChannelTriggerSetting(Bool_t value)
-{
-  TGCheckButton *object = (TGCheckButton *) gTQSender;
-  Int_t module = object -> WidgetId();
-
-  if (fIsDebug) {
-    cout << "================================================" << endl;
-    cout << " SetSameChannelTriggerSetting module: " << module + 1;
-    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
-    cout << "================================================" << endl;
-  }
-
-  for (Int_t channel = 1; channel < 4; channel++)
-    fTMTab[module] -> SetEnabled(channel, !value);
-  fTMTab[module] -> SetTab(0, kFALSE);
-
-//  fSettings.fUseSameChannelTriggerSetting[module] = value;
 }
 
 void NFADC400::SetTriggerModeWidth(Bool_t value)
@@ -733,7 +733,7 @@ void NFADC400::SetTriggerModeCount(Bool_t value)
   fTMCountThres[module][channel] -> SetEnabled(value);
   fTMCountInterval[module][channel] -> SetEnabled(value);
 
-//  fSettings.fValueTMCount[module][channel] = value;
+  fSettings.fValueTMCount[module][channel] = value;
 }
 
 void NFADC400::SetTMCThres(const Char_t *value)
@@ -752,7 +752,7 @@ void NFADC400::SetTMCThres(const Char_t *value)
     cout << "=======================================" << endl;
   }
 
-//      fSettings.fValueTMCountThres[module][channel] = atoi(value);
+  fSettings.fValueTMCountThres[module][channel] = atoi(value);
 }
 
 void NFADC400::SetTMCInterval(const Char_t *value)
@@ -771,7 +771,7 @@ void NFADC400::SetTMCInterval(const Char_t *value)
     cout << "=============================================" << endl;
   }
 
-//    fSettings.fValueTMCountInterval[module][channel] = atoi(value);
+  fSettings.fValueTMCountInterval[module][channel] = atoi(value);
 }
 
 void NFADC400::SaveSettings()
@@ -794,7 +794,7 @@ void NFADC400::SaveSettings()
   TString savingFile = ((TObjString *) decomposedFileNameWithPath -> Last()) -> GetString();
 
   // If the extension is not "fadc400cfg", add it.
-  TString extension = savingFile(savingFile.Length() - 11, 11);
+  TString extension = savingFile(savingFile.Length() - 12, 12);
   if (!extension.EqualTo(".nfadc400cfg")) {
     filenameWithPath.Append(".nfadc400cfg");
     savingFile.Append(".nfadc400cfg");
@@ -830,7 +830,7 @@ void NFADC400::LoadSettings()
 {
   // Open dialog for loading action.
   TGFileInfo fileInfo;
-  const Char_t *fileType[4] = {"NFADC400CFG files", "*.fadc400cfg", 0, 0}; 
+  const Char_t *fileType[4] = {"NFADC400CFG files", "*.nfadc400cfg", 0, 0}; 
   fileInfo.fFileTypes = fileType;
   new TGFileDialog(gClient -> GetRoot(), this, kFDOpen, &fileInfo);
 
@@ -846,8 +846,8 @@ void NFADC400::LoadSettings()
   delete decomposedFileNameWithPath;
 
   // If the extension is not "fadc400cfg", it is not loaded.
-  TString extension = filenameWithPath(filenameWithPath.Length() - 11, 11);
-  if (!extension.EqualTo(".fadc400cfg")) {
+  TString extension = filenameWithPath(filenameWithPath.Length() - 12, 12);
+  if (!extension.EqualTo(".nfadc400cfg")) {
     cout << "====================================" << endl;
     cout << " The file you chose cannot be used!" << endl;
     cout << "====================================" << endl;
@@ -875,39 +875,33 @@ void NFADC400::Start()
 
 void NFADC400::SetSettingsFromUI()
 {
-  /*
   // Confirm the values in NumberEntryFields
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
       fID[iModule][iChannel] -> TextChanged();
       fAO[iModule][iChannel] -> TextChanged();
-//      fThres[iModule][iChannel] -> TextChanged();
+      fIAG[iModule][iChannel] -> TextChanged();
     }
 
-    for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
-      fDT[iModule][iCGroup] -> TextChanged();
-      fCW[iModule][iCGroup] -> TextChanged();
+    fTOW[iModule] -> TextChanged();
 
-      fTMWidthThres[iModule][iCGroup] -> TextChanged();
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fThres[iModule][iChannel] -> TextChanged();
+      fDT[iModule][iChannel] -> TextChanged();
+      fCW[iModule][iChannel] -> TextChanged();
 
-      if (fSettings.fValueTMCount[iModule][iCGroup]) {
-          fTMCountThres[iModule][iCGroup][1] -> TextChanged();
-          fTMCountThres[iModule][iCGroup][2] -> TextChanged();
-          fTMCountInterval[iModule][iCGroup][1] -> TextChanged();
-          fTMCountInterval[iModule][iCGroup][2] -> TextChanged();
-        } else {
-          fTMCountThres[iModule][iCGroup][option] -> TextChanged();
-          fTMCountInterval[iModule][iCGroup][option] -> TextChanged();
-        }
-      }
+      fTMWidthThres[iModule][iChannel] -> TextChanged();
+
+      fTMCountThres[iModule][iChannel] -> TextChanged();
+      fTMCountInterval[iModule][iChannel] -> TextChanged();
     }
   }
 
   fNumEvents -> TextChanged();
 
   for (Int_t iModule = 0; iModule < 2; iModule++) {
-    if (fSettings.fUseSameCGroupSetting[iModule])
-      fSettings.UseSameCGroupSetting(iModule);
+    if (fSettings.fUseSameChannelTriggerSetting[iModule])
+      fSettings.UseSameChannelTriggerSetting(iModule);
 
     if (fSettings.fUseSameChannelSetting[iModule])
       fSettings.UseSameChannelSetting(iModule);
@@ -915,12 +909,10 @@ void NFADC400::SetSettingsFromUI()
 
   if (fSettings.fUseSameModuleSetting) 
     fSettings.UseSameModuleSetting();
-    */
 }
 
 void NFADC400::SetSettingsToUI()
 {
-  /*
   if (fSettings.fUseSameModuleSetting)
     fSameModuleSettingButton -> SetState(kButtonDown, kTRUE);
   else
@@ -933,7 +925,7 @@ void NFADC400::SetSettingsToUI()
     else
       fActive[iModule] -> SetState(kButtonUp, kTRUE);
 
-//    fRL[iModule] -> Select(fSettings.fValueRL[iModule]);
+    fRL[iModule] -> Select(fSettings.fValueRL[iModule]);
 
     if (fSettings.fUseSameChannelSetting[iModule])
       fSameChannelSettingButton[iModule] -> SetState(kButtonDown, kTRUE);
@@ -944,50 +936,40 @@ void NFADC400::SetSettingsToUI()
       fIP[iModule][iChannel] -> Select(fSettings.fValueIP[iModule][iChannel]);
       fID[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueID[iModule][iChannel]), kFALSE);
       fAO[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueAO[iModule][iChannel]), kFALSE);
-//      fThres[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueThres[iModule][iChannel]), kFALSE);
+      fIAG[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueIAG[iModule][iChannel]), kFALSE);
     }
 
     fCLT[iModule] -> Select(fSettings.fValueCLT[iModule]);
+    fTOW[iModule] -> SetText(Form("%d", fSettings.fValueTOW[iModule]), kFALSE);
+    fTDC[iModule] -> Select(fSettings.fValueTDC[iModule]);
 
-    if (fSettings.fUseSameCGroupSetting[iModule])
-      fSameCGroupSettingButton[iModule] -> SetState(kButtonDown, kTRUE);
+    if (fSettings.fUseSameChannelTriggerSetting[iModule])
+      fSameChannelTriggerSettingButton[iModule] -> SetState(kButtonDown, kTRUE);
     else
-      fSameCGroupSettingButton[iModule] -> SetState(kButtonUp, kTRUE);
+      fSameChannelTriggerSettingButton[iModule] -> SetState(kButtonUp, kTRUE);
 
-    for (Int_t iCGroup = 0; iCGroup < 2; iCGroup++) {
-      fDT[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueDT[iModule][iCGroup]), kFALSE);
-      fCW[iModule][iCGroup] -> SetText(Form("%d", fSettings.fValueCW[iModule][iCGroup]), kFALSE);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      fThres[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueThres[iModule][iChannel]), kFALSE);
+      fDT[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueDT[iModule][iChannel]), kFALSE);
+      fCW[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueCW[iModule][iChannel]), kFALSE);
 
-      if (fSettings.fValueTMWidth[iModule][iCGroup]) {
-        fTMWidth[iModule][iCGroup] -> SetState(kButtonDown, kTRUE);
-        fTMWidthThres[iModule][iCGroup] -> SetText(Form("%.1f", fSettings.fValueTMWidthThres[iModule][iCGroup]));
-      } else {
-        fTMWidth[iModule][iCGroup] -> SetState(kButtonUp, kTRUE);
-      }
+      if (fSettings.fValueTMWidth[iModule][iChannel]) {
+        fTMWidth[iModule][iChannel] -> SetState(kButtonDown, kTRUE);
+        fTMWidthThres[iModule][iChannel] -> SetText(Form("%.1f", fSettings.fValueTMWidthThres[iModule][iChannel]));
+      } else
+        fTMWidth[iModule][iChannel] -> SetState(kButtonUp, kTRUE);
 
-      if (fSettings.fValueTMCount[iModule][iCGroup]) {
-        fTMCount[iModule][iCGroup] -> SetState(kButtonDown, kTRUE);
+      if (fSettings.fValueTMCount[iModule][iChannel]) {
+        fTMCount[iModule][iChannel] -> SetState(kButtonDown, kTRUE);
 
-        Int_t option = fSettings.fValueTMCountOption[iModule][iCGroup];
-        fTMCountOption[iModule][iCGroup][option] -> SetState(kButtonDown, kTRUE);
-        if (option != 3) {
-          fTMCountThres[iModule][iCGroup][option] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][0]));
-          fTMCountInterval[iModule][iCGroup][option] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][0]));
-        } else {
-          fTMCountThres[iModule][iCGroup][1] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][0]));
-          fTMCountThres[iModule][iCGroup][2] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iCGroup][1]));
-          fTMCountInterval[iModule][iCGroup][1] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][0]));
-          fTMCountInterval[iModule][iCGroup][2] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iCGroup][1]));
-        }
-
-      } else {
-        fTMCount[iModule][iCGroup] -> SetState(kButtonUp, kTRUE);
-      }
+        fTMCountThres[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueTMCountThres[iModule][iChannel]));
+        fTMCountInterval[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueTMCountInterval[iModule][iChannel]));
+      } else
+        fTMCount[iModule][iChannel] -> SetState(kButtonUp, kTRUE);
     }
   }
 
   fNumEvents -> SetText(Form("%d", fSettings.fValueNumEvents), kFALSE);
-  */
 }
 
 Int_t main(int argc, char **argv)
