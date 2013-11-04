@@ -1,7 +1,7 @@
 /////////////////////////////////////
 //                                 //
-//        FADC400 module GUI       //
-//       Setting Control Class     //
+//       NFADC400 module GUI       //
+//      Setting Control Class      //
 //                                 //
 //  Author: Genie Jhang            //
 // Contact: geniejhang@majimak.com //
@@ -9,9 +9,9 @@
 //                                 //
 /////////////////////////////////////
 
-#include "FADC400Settings.hh"
+#include "NFADC400Settings.hh"
 
-void FADC400Settings::Initialize()
+void NFADC400Settings::Initialize()
 {
   fUseSameModuleSetting = 0;
   
@@ -52,7 +52,7 @@ void FADC400Settings::Initialize()
   fValueNumEvents = 0;
 }
 
-void FADC400Settings::UseSameModuleSetting()
+void NFADC400Settings::UseSameModuleSetting()
 {
   fIsActive[1] = fIsActive[0];
   
@@ -115,7 +115,7 @@ void FADC400Settings::UseSameModuleSetting()
   }
 }
 
-void FADC400Settings::UseSameChannelSetting(Int_t module)
+void NFADC400Settings::UseSameChannelSetting(Int_t module)
 {
   for (Int_t iChannel = 1; iChannel < 4; iChannel++) {
     fValueAC[module][iChannel] = fValueAC[module][0];
@@ -128,7 +128,7 @@ void FADC400Settings::UseSameChannelSetting(Int_t module)
   }
 }
 
-void FADC400Settings::UseSameCGroupSetting(Int_t module)
+void NFADC400Settings::UseSameCGroupSetting(Int_t module)
 {
   fValueDT[module][1] = fValueDT[module][0];
   fValueCW[module][1] = fValueCW[module][0];

@@ -1,7 +1,7 @@
 /////////////////////////////////////
 //                                 //
-//        FADC400 module GUI       //
-//       Setting Control Class     //
+//       NFADC400 module GUI       //
+//      Setting Control Class      //
 //                                 //
 //  Author: Genie Jhang            //
 // Contact: geniejhang@majimak.com //
@@ -9,12 +9,12 @@
 //                                 //
 /////////////////////////////////////
 
-#ifndef _FADC400SETTINGS_H_
-#define _FADC400SETTINGS_H_
+#ifndef _NFADC400SETTINGS_H_
+#define _NFADC400SETTINGS_H_
 
 #include "TROOT.h"
 
-class FADC400Settings
+class NFADC400Settings
 {
   public:
     void Initialize();
