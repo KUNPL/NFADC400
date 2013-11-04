@@ -13,6 +13,10 @@
 #define __FADC400PROCESS_H_
 
 #include "FADC400Constants.hh"
+#include "FADC400Settings.hh"
+
+#include "NoticeFADC400.h"
+#include "TROOT.h"
 
 class TFile;
 class FADC400Header;
@@ -40,10 +44,12 @@ class FADC400Process
     void DataRL256(Int_t, Int_t, Int_t);
     void DataRL512(Int_t, Int_t, Int_t);
 
+    NKFADC400 fAdc; // NOTICE KOREA FADC400 Class
     Int_t fNKUSB;
     Int_t fModuleID[2];
     Int_t fActiveModule[2];
     Int_t fActiveChannel[2][4];
+    Int_t fEventsToTake;
     Int_t fEventNum[2][4];
 
     TFile *fOutFile;
