@@ -29,6 +29,7 @@ void NFADC400Header::Initialize()
   fRL = 0;
 
   for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+    fAC[iChannel] = 0;
     fIP[iChannel] = 0;
     fID[iChannel] = 0;
     fAO[iChannel] = 0;

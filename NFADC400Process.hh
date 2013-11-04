@@ -1,6 +1,6 @@
 /////////////////////////////////////
 //                                 //
-//       FADC400 module GUI        //
+//       NFADC400 module GUI       //
 //    Data Taking Process Class    //
 //                                 //
 //  Author: Genie Jhang            //
@@ -9,24 +9,24 @@
 //                                 //
 /////////////////////////////////////
 
-#ifndef __FADC400PROCESS_H_
-#define __FADC400PROCESS_H_
+#ifndef _NFADC400PROCESS_H_
+#define _NFADC400PROCESS_H_
 
-#include "FADC400Constants.hh"
-#include "FADC400Settings.hh"
+#include "NFADC400Constants.hh"
+#include "NFADC400Settings.hh"
 
-#include "NoticeFADC400.h"
+#include "NoticeNFADC400.h"
 #include "TROOT.h"
 
 class TFile;
-class FADC400Header;
+class NFADC400Header;
 class TClonesArray;
 
-class FADC400Process 
+class NFADC400Process 
 {
   public:
-    FADC400Process(FADC400Settings);
-    ~FADC400Process();
+    NFADC400Process(NFADC400Settings);
+    ~NFADC400Process();
 
   private:
     void Initialize();
@@ -43,8 +43,11 @@ class FADC400Process
     void DataRL128(Int_t, Int_t, Int_t);
     void DataRL256(Int_t, Int_t, Int_t);
     void DataRL512(Int_t, Int_t, Int_t);
+    void DataRL1024(Int_t, Int_t, Int_t);
+    void DataRL2048(Int_t, Int_t, Int_t);
+    void DataRL4096(Int_t, Int_t, Int_t);
 
-    NKFADC400 fAdc; // NOTICE KOREA FADC400 Class
+    NKNFADC400 fAdc; // NOTICE KOREA NFADC400 Class
     Int_t fNKUSB;
     Int_t fModuleID[2];
     Int_t fActiveModule[2];
@@ -53,7 +56,7 @@ class FADC400Process
     Int_t fEventNum[2][4];
 
     TFile *fOutFile;
-    FADC400Header *fHeader[2];
+    NFADC400Header *fHeader[2];
     TClonesArray *fEvent[2][4];
 };
 

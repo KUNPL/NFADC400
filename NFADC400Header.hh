@@ -23,11 +23,13 @@ class NFADC400Header : public TNamed
         void SetRL(Int_t value) { fRL = value; }
        Int_t GetRL()            { return fRL; }
 
+        void SetAC(Int_t channel, Bool_t value) { fAC[channel] = value; }
         void SetIP(Int_t channel, Bool_t value) { fIP[channel] = value; }
         void SetID(Int_t channel, Int_t value)  { fID[channel] = value; }
         void SetAO(Int_t channel, Int_t value)  { fAO[channel] = value; }
         void SetIAG(Int_t channel, Int_t value) { fIAG[channel] = value; }
 
+       Int_t GetAC(Int_t channel)               { return fAC[channel]; }
       Bool_t GetIP(Int_t channel)               { return fIP[channel]; }
        Int_t GetID(Int_t channel)               { return fID[channel]; }
        Int_t GetAO(Int_t channel)               { return fAO[channel]; }
@@ -72,6 +74,7 @@ class NFADC400Header : public TNamed
     Int_t fRL;
 
     // Channels' Header
+    Int_t fAC[4];
     Bool_t fIP[4];
     Int_t fID[4];
     Int_t fAO[4];
