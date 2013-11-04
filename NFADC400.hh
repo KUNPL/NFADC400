@@ -36,6 +36,7 @@ class NFADC400 : public TGMainFrame
     void SetActive(Bool_t);
     void SetSameChannelSetting(Bool_t);
 
+    void SetAC(Bool_t);
     void SetIP(Int_t);
     void SetID(const Char_t *);
     void SetAO(const Char_t *);
@@ -100,6 +101,9 @@ class NFADC400 : public TGMainFrame
     // Channel tab
     TGTab *fChannelTab[2];
     TGCompositeFrame *fCh[2][4];
+
+    // Input polarity
+    TGCheckButton *fAC[2][4];
 
     // Input polarity
     TGLabel *fTextIP;

@@ -83,12 +83,16 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     Int_t moduleFrameHMargin = 5;
     Int_t moduleFrameWidth = 286;
-    Int_t moduleFrameHeight = 75;
+    Int_t moduleFrameHeight = 55;
     fModuleSettingFrame[iModule] -> MoveResize(moduleFrameHMargin, 5, moduleFrameWidth, moduleFrameHeight);
     fModule[iModule] -> AddFrame(fModuleSettingFrame[iModule]);
 
+    fActive[iModule] = new TGCheckButton(fModuleSettingFrame[iModule], "Active", iModule);
+    fActive[iModule] -> Connect("Toggled(Bool_t)", "NFADC400", this, "SetActive(Bool_t)");
+    fActive[iModule] -> Move(40, 21);
+
     fTextAddress = new TGLabel(fModuleSettingFrame[iModule], "Address:");
-    fTextAddress -> Move(30, 30);
+    fTextAddress -> Move(130, 22);
 
     fAddress[iModule] = new TGComboBox(fModuleSettingFrame[iModule], iModule);
     for (Int_t iAddress = 0; iAddress < 6; iAddress++)
@@ -96,12 +100,8 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
   
     fAddress[iModule] -> Connect("Selected(Int_t)", "NFADC400", this, "SetAddress(Int_t)");
     fAddress[iModule] -> Select(3 + iModule);
-    fAddress[iModule] -> MoveResize(90, 28, 50, 20);
+    fAddress[iModule] -> MoveResize(185, 20, 50, 20);
     fModuleSettingFrame[iModule] -> AddFrame(fAddress[iModule]);
-
-    fActive[iModule] = new TGCheckButton(fModuleSettingFrame[iModule], "Active", iModule);
-    fActive[iModule] -> Connect("Toggled(Bool_t)", "NFADC400", this, "SetActive(Bool_t)");
-    fActive[iModule] -> Move(180, 30);
     // == End of Module Setting Frame ===========================================
 
     // == Start of Channel Setting Frame ========================================
@@ -110,8 +110,8 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
 
     Int_t channelFrameHMargin = 5;
     Int_t channelFrameWidth = 286;
-    Int_t channelFrameHeight = 205;
-    fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 74, channelFrameWidth, channelFrameHeight);
+    Int_t channelFrameHeight = 226;
+    fChannelFrame[iModule] -> MoveResize(channelFrameHMargin, 53, channelFrameWidth, channelFrameHeight);
     fModule[iModule] -> AddFrame(fChannelFrame[iModule]);
 
     // == Start of Recording length =============================================
@@ -147,42 +147,48 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
     for (Int_t iChannel = 0; iChannel < 4; iChannel++ ) {
       Int_t widgetID = iModule*100 + iChannel*10;
 
+      // == Start of Active Channel ===============================================
+      fAC[iModule][iChannel] = new TGCheckButton(fCh[iModule][iChannel], "Active", widgetID);
+      fAC[iModule][iChannel] -> Connect("Toggled(Bool_t)", "NFADC400", this, "SetAC(Bool_t)");
+      fAC[iModule][iChannel] -> Move(7, 7);
+      // == End of Active Channel =================================================
+
       // == Start of Input polarity ===============================================
       fTextIP = new TGLabel(fCh[iModule][iChannel], "Input polarity");
-      fTextIP -> Move(7, 7);
+      fTextIP -> Move(7, 29);
       fIP[iModule][iChannel] = new TGComboBox(fCh[iModule][iChannel], widgetID);
       fIP[iModule][iChannel] -> AddEntry("(-)", 0);
       fIP[iModule][iChannel] -> AddEntry("(+)", 1);
       fIP[iModule][iChannel] -> Connect("Selected(Int_t)", "NFADC400", this, "SetIP(Int_t)");
       fIP[iModule][iChannel] -> Select(0);
-      fIP[iModule][iChannel] -> MoveResize(187, 7, 70, 18);
+      fIP[iModule][iChannel] -> MoveResize(187, 29, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fIP[iModule][iChannel]);
       // == End of Input polarity =================================================
 
       // == Start of Input delay ==================================================
       fTextID = new TGLabel(fCh[iModule][iChannel], "Input delay (0 - 40940) (ns)");
-      fTextID -> Move(7, 29);
+      fTextID -> Move(7, 51);
       fID[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 10240, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 40940);
       fID[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "NFADC400", this, "SetID(const Char_t *)");
-      fID[iModule][iChannel] -> MoveResize(187, 29, 70, 18);
+      fID[iModule][iChannel] -> MoveResize(187, 51, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fID[iModule][iChannel]);
       // == End of Input delay ====================================================
 
       // == Start of ADC Offset ===================================================
       fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC offset (0 - 4095) (ns)");
-      fTextAO -> Move(7, 51);
+      fTextAO -> Move(7, 73);
       fAO[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 4095);
       fAO[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "NFADC400", this, "SetAO(const Char_t *)");
-      fAO[iModule][iChannel] -> MoveResize(187, 51, 70, 18);
+      fAO[iModule][iChannel] -> MoveResize(187, 73, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fAO[iModule][iChannel]);
       // == End of ADC Offset =====================================================
 
       // == Start of Input amplifier gain =========================================
       fTextIAG = new TGLabel(fCh[iModule][iChannel], "Input amplifier gain (0 - 4095)");
-      fTextIAG -> Move(7, 73);
+      fTextIAG -> Move(7, 95);
       fIAG[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 4095);
       fIAG[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "NFADC400", this, "SetIAG(const Char_t *)");
-      fIAG[iModule][iChannel] -> MoveResize(187, 73, 70, 18);
+      fIAG[iModule][iChannel] -> MoveResize(187, 95, 70, 18);
       fCh[iModule][iChannel] -> AddFrame(fIAG[iModule][iChannel]);
       // == End of Input amplifier gain ===========================================
 
@@ -453,6 +459,25 @@ void NFADC400::SetSameChannelSetting(Bool_t value)
   fChannelTab[module] -> SetTab(0, kFALSE);
 
   fSettings.fUseSameChannelSetting[module] = value;
+}
+
+void NFADC400::SetAC(Bool_t value)
+{
+  TGComboBox *object = (TGComboBox *) gTQSender;
+  Int_t widgetID = object -> WidgetId();
+
+  Int_t module = widgetID/100;
+  Int_t channel = (widgetID%100)/10;
+
+  if (fIsDebug) {
+    cout << "==================================" << endl;
+    cout << " SetAC module:" << module + 1;
+    cout << " channel:" << channel + 1;
+    cout << " is " << ( value ? "On!" : "Off!" ) << endl;
+    cout << "==================================" << endl;
+  }
+
+//  fSettings.fValueAC[module][channel] = value;
 }
 
 void NFADC400::SetIP(Int_t value)
