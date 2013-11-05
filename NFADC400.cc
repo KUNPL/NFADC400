@@ -28,6 +28,7 @@ using std::ofstream;
 #include "TObjString.h"
 
 #include "NFADC400.hh"
+#include "NFADC400Process.hh"
 
 ClassImp(NFADC400);
 
@@ -896,6 +897,7 @@ void NFADC400::LoadSettings()
 void NFADC400::Start()
 {
   SetSettingsFromUI();
+  new NFADC400Process(fSettings);
 }
 
 void NFADC400::SetSettingsFromUI()

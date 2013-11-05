@@ -19,6 +19,7 @@
 #include "TROOT.h"
 
 class TFile;
+class TTree;
 class NFADC400Header;
 class TClonesArray;
 
@@ -57,6 +58,7 @@ class NFADC400Process
 
     TFile *fOutFile;
     NFADC400Header *fHeader[2];
+    TTree *fEventTree[2][4];
     TClonesArray *fEvent[2][4];
 };
 
