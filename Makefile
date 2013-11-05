@@ -29,7 +29,7 @@ $(LINKDEF):
 	@echo "#ifdef __CINT__" > LinkdefHeader
 	@$(shell ls $(INCDIR) | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 == "NFADC400" || $$1 == "NFADC400Header") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
 	@echo "#endif" > LinkdefFooter
-	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
+	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefNFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
 
 clean:
