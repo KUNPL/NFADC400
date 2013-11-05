@@ -102,7 +102,7 @@ class NFADC400 : public TGMainFrame
     TGTab *fChannelTab[2];
     TGCompositeFrame *fCh[2][4];
 
-    // Input polarity
+    // Active channel
     TGCheckButton *fAC[2][4];
 
     // Input polarity
