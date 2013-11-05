@@ -24,22 +24,26 @@ class NFADC400Event : public TNamed
     void SetNumData(Int_t value)            { fNumData = value; }
     void SetWidthTrigger(Short_t value)     { fWidthTrigger = value; }
     void SetCountTrigger(Short_t value)     { fCountTrigger = value; }
+    void SetTriggerTime(ULong64_t value)    { fTriggerTime = value; }
 
       Int_t GetNumData()         { return fNumData; }
     Short_t GetWidthTrigger()    { return fWidthTrigger; }
     Short_t GetCountTrigger()    { return fCountTrigger; }
+  ULong64_t GetTriggerTime()     { return fTriggerTime; }
 
     void Initialize()
     {
       fNumData = 0;
       fWidthTrigger = 0;
       fCountTrigger = 0;
+      fTriggerTime = 0;
     }
 
   private:
       Int_t fNumData;
     Short_t fWidthTrigger;
     Short_t fCountTrigger;
+  ULong64_t fTriggerTime;
 
   ClassDef(NFADC400Event, 1);
 };
