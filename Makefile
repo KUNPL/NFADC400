@@ -11,7 +11,7 @@ CXX = g++
 PREFIX = NFADC400
 TARGET = $(PREFIX)
 SOURCE = $(wildcard $(PREFIX)*.cc)
-HEADER = NFADC400.hh
+HEADER = NFADC400.hh NFADC400Header.hh NFADC400Event.hh
 DICT = $(TARGET)Dict.cc
 LINKDEF = $(TARGET)LinkDef.hh
 CFLAGS = $(ROOT_CFLAGS) $(NK_CFLAGS)
@@ -27,7 +27,7 @@ $(DICT): $(HEADER) $(LINKDEF)
 $(LINKDEF):
 	@echo "" > LinkdefSpace
 	@echo "#ifdef __CINT__" > LinkdefHeader
-	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 != "NFADC400Settings") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
+	@$(shell ls $(INCDIR) | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 == "NFADC400" || $$1 == "NFADC400Header") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
 	@echo "#endif" > LinkdefFooter
 	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
