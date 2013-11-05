@@ -1,6 +1,6 @@
 /////////////////////////////////////
 //                                 //
-//        FADC400 module GUI       //
+//       NFADC400 module GUI       //
 //                                 //
 //  Author: Genie Jhang            //
 // Contact: geniejhang@majimak.com //
@@ -8,8 +8,8 @@
 //                                 //
 /////////////////////////////////////
 
-#ifndef _FADC400_H_
-#define _FADC400_H_
+#ifndef _NFADC400_H_
+#define _NFADC400_H_
 
 #include "TString.h"
 
@@ -22,13 +22,13 @@
 #include "TGButtonGroup.h"
 #include "TGNumberEntry.h"
 
-#include "FADC400Settings.hh"
+#include "NFADC400Settings.hh"
 
-class FADC400 : public TGMainFrame
+class NFADC400 : public TGMainFrame
 {
   public:
-    FADC400(const TGWindow *, UInt_t, UInt_t);
-    virtual ~FADC400();
+    NFADC400(const TGWindow *, UInt_t, UInt_t);
+    virtual ~NFADC400();
 
     void SetSameModuleSetting(Bool_t);
 
@@ -37,26 +37,26 @@ class FADC400 : public TGMainFrame
     void SetSameChannelSetting(Bool_t);
 
     void SetAC(Bool_t);
-    void SetDSM(Int_t);
     void SetIP(Int_t);
     void SetID(const Char_t *);
     void SetAO(const Char_t *);
-    void SetThres(const Char_t *);
+    void SetIAG(const Char_t *);
     void SetRL(Int_t);
 
     void SetCLT(Int_t);
+    void SetTOW(const Char_t *);
+    void SetTDC(Int_t);
 
-    void SetSameCGroupSetting(Bool_t);
+    void SetSameChannelTriggerSetting(Bool_t);
 
+    void SetThres(const Char_t *);
     void SetDT(const Char_t *);
     void SetCW(const Char_t *);
 
     void SetTriggerModeWidth(Bool_t);
-    void SetTMWOption(Int_t);
     void SetTMWThres(const Char_t *);
 
     void SetTriggerModeCount(Bool_t);
-    void SetTMCOption(Int_t);
     void SetTMCThres(const Char_t *);
     void SetTMCInterval(const Char_t *);
 
@@ -71,35 +71,39 @@ class FADC400 : public TGMainFrame
 
   private:
     void Initialize();
-    FADC400Settings fSettings;
+    NFADC400Settings fSettings;
     Bool_t fIsDebug;
 
     // Module
     TGGroupFrame *fModuleFrame;
     TGCheckButton *fSameModuleSettingButton;
+
+    // Module tab
     TGTab *fModuleTab;
-    TGCompositeFrame *fFADC[2];
+    TGCompositeFrame *fModule[2];
 
-    // Channel setting frame
-    TGGroupFrame *fChannelFrame[2];
-    TGCheckButton *fSameChannelSettingButton[2];
-
-    // Channel Tab
-    TGTab *fChannelTab[2];
-    TGCompositeFrame *fCh[2][4];
+    // Module setting frame
+    TGGroupFrame *fModuleSettingFrame[2];
 
     // Channel
     TGLabel *fTextAddress;
     TGComboBox *fAddress[2];
     TGButton *fActive[2];
 
-    // Active Channel
-    TGLabel *fTextAC;
-    TGCheckButton *fAC[2][4];
+    // Channel setting frame
+    TGGroupFrame *fChannelFrame[2];
+    TGCheckButton *fSameChannelSettingButton[2];
 
-    // Data saving mode
-    TGLabel *fTextDSM;
-    TGComboBox *fDSM[2][4];
+    // Recording length
+    TGLabel *fTextRL;
+    TGComboBox *fRL[2];
+
+    // Channel tab
+    TGTab *fChannelTab[2];
+    TGCompositeFrame *fCh[2][4];
+
+    // Active channel
+    TGCheckButton *fAC[2][4];
 
     // Input polarity
     TGLabel *fTextIP;
@@ -113,51 +117,53 @@ class FADC400 : public TGMainFrame
     TGLabel *fTextAO;
     TGNumberEntryField *fAO[2][4];
 
-    // Threshold
-    TGLabel *fTextThres;
-    TGNumberEntryField *fThres[2][4];
-
-    // Recording length
-    TGLabel *fTextRL;
-    TGComboBox *fRL[2][4];
+    // Input amplifier gain
+    TGLabel *fTextIAG;
+    TGNumberEntryField *fIAG[2][4];
 
     // Trigger Output Frame
     TGGroupFrame *fTriggerFrame[2];
 
     // Contidion Lookup Table
-    TGLabel *fTextCLT;
+    TGLabel *fTextCLT[2];
     TGComboBox *fCLT[2];
+
+    // Trigger Output Width
+    TGLabel *fTextTOW;
+    TGNumberEntryField *fTOW[2];
+
+    // Trigger Daisy Chain
+    TGLabel *fTextTDC;
+    TGComboBox *fTDC[2];
 
     // Trigger Mode Frame
     TGGroupFrame *fTModeFrame[2];
+    TGCheckButton *fSameChannelTriggerSettingButton[2];
 
-    TGCheckButton *fSameCGroupSettingButton[2];
+    // Trigger Mode Channel Tab
+    TGTab *fTMTab[4];
+    TGCompositeFrame *fTM[2][4];
 
-    // Trigger Mode Channel Group Tab
-    TGTab *fTMTab[2];
-    TGCompositeFrame *fTMCG[2][2];
+    // Threshold
+    TGLabel *fTextThres;
+    TGNumberEntryField *fThres[2][4];
 
     // Deadtime
     TGLabel *fTextDT;
-    TGNumberEntryField *fDT[2][2];
+    TGNumberEntryField *fDT[2][4];
 
     // Coincidence Width
     TGLabel *fTextCW;
-    TGNumberEntryField *fCW[2][2];
+    TGNumberEntryField *fCW[2][4];
 
     // Width Trigger mode
-    TGCheckButton *fTMWidth[2][2];
-    TGComboBox *fTMWidthOption[2][2];
-    TGLabel *fTextTWidth;
-    TGNumberEntryField *fTMWidthThres[2][2];
+    TGCheckButton *fTMWidth[2][4];
+    TGNumberEntryField *fTMWidthThres[2][4];
 
     // Count Trigger mode
-    TGCheckButton *fTMCount[2][2];
-    TGLabel *fTextTMCount;
-    TGButtonGroup *fTMCountOptionGroup[2][2];
-    TGRadioButton *fTMCountOption[2][2][4];
-    TGNumberEntryField *fTMCountThres[2][2][3];
-    TGNumberEntryField *fTMCountInterval[2][2][3];
+    TGCheckButton *fTMCount[2][4];
+    TGNumberEntryField *fTMCountThres[2][4];
+    TGNumberEntryField *fTMCountInterval[2][4];
 
     // The number of events to take
     TGLabel *fTextNumEvents;
@@ -171,7 +177,7 @@ class FADC400 : public TGMainFrame
     // Copyright
     TGLabel *fCopyright;
 
-  ClassDef(FADC400, 1);
+  ClassDef(NFADC400, 1);
 };
 
 #endif

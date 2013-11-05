@@ -3,15 +3,15 @@ ROOT_GLIBS = $(shell root-config --glibs)
 
 #The lines below are uncommented after finishing development.
 NK_CFLAGS = -DNKROOT -I$(NKHOME)/include
-NK_LIBS = -L$(NKHOME)/lib -lNotice6UVME_root -lNoticeFADC400_root
+NK_LIBS = -L$(NKHOME)/lib -lNotice6UVME_root -lNoticeNFADC400_root
 
 UNAME = $(shell uname -rs | cut -d. -f 1)
 CXX = g++
 
-PREFIX = FADC400
+PREFIX = NFADC400
 TARGET = $(PREFIX)
 SOURCE = $(wildcard $(PREFIX)*.cc)
-HEADER = FADC400.hh FADC400Header.hh FADC400Event.hh
+HEADER = NFADC400.hh
 DICT = $(TARGET)Dict.cc
 LINKDEF = $(TARGET)LinkDef.hh
 CFLAGS = $(ROOT_CFLAGS) $(NK_CFLAGS)
@@ -27,7 +27,7 @@ $(DICT): $(HEADER) $(LINKDEF)
 $(LINKDEF):
 	@echo "" > LinkdefSpace
 	@echo "#ifdef __CINT__" > LinkdefHeader
-	@$(shell ls $(INCDIR) | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 == "FADC400" || $$1 == "FADC400Header") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
+	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 != "NFADC400Settings") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
 	@echo "#endif" > LinkdefFooter
 	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
