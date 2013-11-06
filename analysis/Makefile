@@ -3,7 +3,7 @@ ROOT_LIBS = $(shell root-config --libs)
 
 CXX = g++
 
-PREFIX = FADC400
+PREFIX = NFADC400
 TARGET = lib$(PREFIX)
 SOURCE = $(wildcard $(PREFIX)*.cc)
 HEADER = $(filter-out FADC400Constants.hh,$(wildcard $(PREFIX)*.hh))
@@ -22,9 +22,9 @@ $(DICT): $(HEADER) $(LINKDEF)
 $(LINKDEF):
 	@echo "" > LinkdefSpace
 	@echo "#ifdef __CINT__" > LinkdefHeader
-	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 != "FADC400Constants") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
+	@$(shell ls | grep ^$(PREFIX) | grep hh | awk -F. {'if ($$1 != "NFADC400Constants") printf("#pragma link C++ class %s+;\n", $$1)'} > LinkdefBody)
 	@echo "#endif" > LinkdefFooter
-	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefFADC400Event LinkdefSpace LinkdefFooter > $@
+	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefNFADC400Event LinkdefSpace LinkdefFooter > $@
 	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
 
 clean:
