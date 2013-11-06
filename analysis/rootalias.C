@@ -69,12 +69,19 @@ void load(TString file)
     }
   }
   cout << endl;
+  cout << "    Try 'plot(eventNum, moduleNum, channelNum)'." << endl;
+  cout << "    For example, the first event in Channel 1" << endl;
+  cout << "    of Module 1, 'plot(0, 1, 1)'" << endl;
+  cout << endl;
   cout << " ====================================================" << endl;
   cout << endl;
 }
 
 void plot(Int_t eventNum, Int_t module, Int_t channel)
 {
+  module -= 1;
+  channel -= 1;
+
   gSystem -> Load("libNFADC400");
 
   fEventTree[module][channel] -> GetEntry(0);
