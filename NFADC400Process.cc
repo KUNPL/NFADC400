@@ -202,7 +202,7 @@ void NFADC400Process::SaveHeader()
       fOutFile -> cd();
 
       fHeader[iModule] = new NFADC400Header();
-      fHeader[iModule] -> SetName(Form("module%d", iModule + 1));
+      fHeader[iModule] -> SetName(Form("Mod%d", iModule + 1));
       fHeader[iModule] -> SetNumEvents(fEventsToTake);
 
       fHeader[iModule] -> SetRL(fAdc.NFADC400read_RL(fNKUSB, fModuleID[iModule]));
@@ -376,8 +376,8 @@ void NFADC400Process::DataRL1(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -419,8 +419,8 @@ void NFADC400Process::DataRL2(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -462,8 +462,8 @@ void NFADC400Process::DataRL4(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -505,8 +505,8 @@ void NFADC400Process::DataRL8(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -548,8 +548,8 @@ void NFADC400Process::DataRL16(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -591,8 +591,8 @@ void NFADC400Process::DataRL32(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -634,8 +634,8 @@ void NFADC400Process::DataRL64(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -677,8 +677,8 @@ void NFADC400Process::DataRL128(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -720,8 +720,8 @@ void NFADC400Process::DataRL256(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -763,8 +763,8 @@ void NFADC400Process::DataRL512(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -806,8 +806,8 @@ void NFADC400Process::DataRL1024(Int_t iModule, Int_t iChannel, Int_t bufferNum)
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -849,8 +849,8 @@ void NFADC400Process::DataRL2048(Int_t iModule, Int_t iChannel, Int_t bufferNum)
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
@@ -892,8 +892,8 @@ void NFADC400Process::DataRL4096(Int_t iModule, Int_t iChannel, Int_t bufferNum)
 
     event = NULL;
 
-    if (fEventNum[iModule][iChannel] + iEvent >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent;
+    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule][iChannel] += iEvent + 1;
       break;
     }
   }
