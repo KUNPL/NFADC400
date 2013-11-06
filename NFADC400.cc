@@ -383,6 +383,9 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
   fCopyright -> Move(230, 380);
   // == End of Copyright ==========================================================
 
+  Connect("CloseWindow()", "TApplication", gApplication, "Terminate()");
+  DontCallClose();
+
   MapSubwindows();
   MapWindow();
 }
