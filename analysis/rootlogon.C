@@ -17,13 +17,8 @@ void rootlogon()
   cout << " //                                              //" << endl;
   cout << " //   Note)                                      //" << endl;
   cout << " //     If you want to read the data in other    //" << endl;
-  cout << " //     folder, you should copy files below.     //" << endl;
-  cout << " //                                              //" << endl;
-  cout << " //   File List)                                 //" << endl;
-  cout << " //     NFADC400Constant.hh                      //" << endl;
-  cout << " //     libNFADC400.so                           //" << endl;
-  cout << " //     rootlogon.C                              //" << endl;
-  cout << " //     rootalias.C                              //" << endl;
+  cout << " //     folder, you should copy the share        //" << endl;
+  cout << " //     library file, libNFADC400.so.            //" << endl;
   cout << " //                                              //" << endl;
   cout << " //////////////////////////////////////////////////" << endl;
   cout << endl;
