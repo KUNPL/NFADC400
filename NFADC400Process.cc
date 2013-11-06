@@ -256,7 +256,7 @@ void NFADC400Process::TakeData()
 
           fOutFile -> cd();
           fEvent[iModule][iChannel] = new TClonesArray(Form("NFADC400Event%d", recordingLength), fHeader[iModule] -> GetNumEvents());
-          fEventTree[iModule][iChannel] = new TTree(Form("Mod%dCh%d", iModule, iChannel), Form("Data of Module %d - Channel %d", iModule, iChannel));
+          fEventTree[iModule][iChannel] = new TTree(Form("Mod%dCh%d", iModule + 1, iChannel + 1), Form("Data of Module %d - Channel %d", iModule + 1, iChannel + 1));
           fEventTree[iModule][iChannel] -> Branch("events", "TClonesArray", fEvent[iModule][iChannel]);
         }
       }
