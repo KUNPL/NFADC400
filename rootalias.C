@@ -54,7 +54,7 @@ NFADC400Event4096 *events4096;
 
 // User use functions
 void load(TString file);
-void plot(Int_t eventNum, Int_t module, Int_t channel);
+void plot(Int_t module, Int_t channel, Int_t eventNum);
 void convert();
 
 // Internel use functions
@@ -103,13 +103,13 @@ void load(TString file)
   cout << endl;
   cout << "    Try 'plot(eventNum, moduleNum, channelNum)'." << endl;
   cout << "    For example, the first event in Channel 1" << endl;
-  cout << "    of Module 1, 'plot(0, 1, 1)'" << endl;
+  cout << "    of Module 2, 'plot(2, 1, 0)'" << endl;
   cout << endl;
   cout << " ====================================================" << endl;
   cout << endl;
 }
 
-void plot(Int_t eventNum, Int_t module, Int_t channel)
+void plot(Int_t module, Int_t channel, Int_t eventNum)
 {
   module -= 1;
   channel -= 1;
