@@ -28,8 +28,14 @@ void rootlogon()
   cout << " //                                              //" << endl;
   cout << " //   Function List)                             //" << endl;
   cout << " //     - load(\"DATAFILE.root\");                 //" << endl;
-  cout << " //     - plot(eventNum, moduleNum, channelNum)  //" << endl;
+  cout << " //     - plot(moduleNum, channelNum, eventNum)  //" << endl;
   cout << " //     - convert()                              //" << endl;
+  cout << " //                                              //" << endl;
+  cout << " //   Note)                                      //" << endl;
+  cout << " //     To see the channel setting information,  //" << endl;
+  cout << " //     for example, that of channel 1 of mod-   //" << endl;
+  cout << " //     ule 2, type 'Mod2 -> Print(1)' after     //" << endl;
+  cout << " //     load().                                  //" << endl;
   cout << " //                                              //" << endl;
   cout << " //////////////////////////////////////////////////" << endl;
   cout << endl;
