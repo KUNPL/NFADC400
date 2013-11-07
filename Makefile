@@ -17,12 +17,32 @@ LINKDEF = $(TARGET)LinkDef.hh
 CFLAGS = $(ROOT_CFLAGS) $(NK_CFLAGS)
 LIBS = $(ROOT_GLIBS) $(NK_LIBS)
 
+SOTARGET = lib$(PREFIX)
+SODICT = $(SOTARGET)Dict.cc
+SOLINKDEF = $(SOTARGET)LinkDef.hh
+SOHEADER = NFADC400Event.hh NFADC400Header.hh
+
 $(TARGET): $(SOURCE:.cc=.o) $(DICT:.cc=.o)
 	$(CXX) -fPIC -o $@ $(LIBS) $^
+
+shared: $(SOHEADER:.hh=.o) $(SODICT:.cc=.o)
+	$(CXX) -fPIC --shared -o $(SOTARGET).so $(ROOT_GLIBS) $^
 
 $(DICT): $(HEADER) $(LINKDEF)
 	rootcint -f $@ -c $^
 	$(CXX) -c -fPIC $@ $(CFLAGS)
+
+$(SODICT): $(SOHEADER) $(SOLINKDEF)
+	rootcint -f $@ -c $^
+	$(CXX) -c -fPIC $@ $(ROOT_CFLAGS)
+
+$(SOLINKDEF): 
+	@echo "" > LinkdefSpace
+	@echo "#ifdef __CINT__" > LinkdefHeader
+	@echo "#pragma link C++ class NFADC400Header+;" > LinkdefBody
+	@echo "#endif" > LinkdefFooter
+	@cat LinkdefHeader LinkdefSpace LinkdefBody LinkdefSpace LinkdefNFADC400Event LinkdefSpace LinkdefFooter > $@
+	@rm -rf LinkdefSpace LinkdefHeader LinkdefBody LinkdefFooter
 
 $(LINKDEF):
 	@echo "" > LinkdefSpace

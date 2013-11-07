@@ -33,11 +33,11 @@ void rootlogon()
   cout << endl;
 
   if (gSystem -> AccessPathName("libNFADC400.so")) {
-    cout << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
-    cout << " !!                                          !!" << endl;
-    cout << " !! Type 'make' to build the shared library! !!" << endl;
-    cout << " !!                                          !!" << endl;
-    cout << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    cout << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+    cout << " !!                                                 !!" << endl;
+    cout << " !! Type 'make shared' to build the shared library! !!" << endl;
+    cout << " !!                                                 !!" << endl;
+    cout << " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
     cout << endl;
   }
 }
