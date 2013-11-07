@@ -28,7 +28,7 @@ void rootlogon()
   cout << " //                                              //" << endl;
   cout << " //   Function List)                             //" << endl;
   cout << " //     - load(\"DATAFILE.root\");                 //" << endl;
-  cout << " //     - plot(eventNum, moduleNum, channelNum)  //" << endl;
+  cout << " //     - plot(moduleNum, channelNum, eventNum)  //" << endl;
   cout << " //     - convert()                              //" << endl;
   cout << " //                                              //" << endl;
   cout << " //////////////////////////////////////////////////" << endl;
