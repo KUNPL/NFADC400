@@ -54,9 +54,12 @@ $(LINKDEF):
 
 clean:
 	@rm -rf $(DICT:.cc=.*)
+	@rm -rf $(SODICT:.cc=.*)
 	@rm -rf *.o
 	@rm -rf $(LINKDEF)
+	@rm -rf $(SOLINKDEF)
 	@rm -rf $(TARGET)
+	@rm -rf $(SOTARGET).so
 
 %.o: %.cc
 	$(CXX) -o $@ -c -fPIC $(CFLAGS) $<
