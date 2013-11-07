@@ -64,7 +64,7 @@ class NFADC400Header : public TNamed
         void SetNumEvents(Int_t value) { fNumEvents = value; }
        Int_t GetNumEvents()            { return fNumEvents; }
 
-        void Print(Int_t);
+        void Print(Int_t channel = 0);
 
   private:
     void Initialize();
