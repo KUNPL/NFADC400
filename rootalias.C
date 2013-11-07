@@ -78,6 +78,24 @@ void load(TString file)
   cout << endl;
   cout << " ====================================================" << endl;
   cout << endl;
+  cout << "    Try 'plot(eventNum, moduleNum, channelNum)'." << endl;
+  cout << "    For example, the first event in Channel 1" << endl;
+  cout << "    of Module 2, 'plot(2, 1, 0)'" << endl;
+  cout << endl;
+  cout << "    To see the module setting information," << endl;
+  cout << "    for example, that of module 2, type" << endl;
+  cout << "    'Mod2 -> Print()' after load()." << endl;
+  cout << endl;
+  cout << "    To see the channel setting information," << endl;
+  cout << "    for example, that of channel 1 of module 2" << endl;
+  cout << "    type 'Mod2 -> Print(1)' after load()." << endl;
+  cout << endl;
+  cout << " ====================================================" << endl;
+  cout << endl;
+
+  cout << endl;
+  cout << " ====================================================" << endl;
+  cout << endl;
   cout << "    Data file information" << endl;
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     fHeader[iModule] = (NFADC400Header *) fFile -> Get(Form("Mod%d", iModule + 1));
@@ -100,18 +118,6 @@ void load(TString file)
       cout << endl;
     }
   }
-  cout << endl;
-  cout << "    Try 'plot(eventNum, moduleNum, channelNum)'." << endl;
-  cout << "    For example, the first event in Channel 1" << endl;
-  cout << "    of Module 2, 'plot(2, 1, 0)'" << endl;
-  cout << endl;
-  cout << "    To see the module setting information," << endl;
-  cout << "    for example, that of module 2, type" << endl;
-  cout << "    'Mod2 -> Print()' after load()." << endl;
-  cout << endl;
-  cout << "    To see the channel setting information," << endl;
-  cout << "    for example, that of channel 1 of module 2" << endl;
-  cout << "    type 'Mod2 -> Print(1)' after load()." << endl;
   cout << endl;
   cout << " ====================================================" << endl;
   cout << endl;
