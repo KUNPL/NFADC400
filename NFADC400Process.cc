@@ -110,7 +110,7 @@ NFADC400Process::NFADC400Process(NFADC400Settings settings)
         fAdc.NFADC400write_DACOFF(fNKUSB, fModuleID[iModule], iChannel + 1, settings.fValueAO[iModule][iChannel]);
 
         // Set input amplifier gain
-        fAdc.NFADC400write_DACGAIN(fNKUSB, fModuleID[iModule], iChannel + 1, settings.fValueAO[iModule][iChannel]);
+        fAdc.NFADC400write_DACGAIN(fNKUSB, fModuleID[iModule], iChannel + 1, settings.fValueIAG[iModule][iChannel]);
       }
 
       // Measure and show pedestal
