@@ -1009,7 +1009,6 @@ void NFADC400::SetSettingsToUI()
 
 Int_t main(int argc, char **argv)
 {
-  gEnv->SetValue("Gui.DefaultFont", "-adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-iso8859-1");
   TApplication theApp("NFADC400GUI", &argc, argv);
   new NFADC400(gClient -> GetRoot(), 720, 425);
   theApp.Run();
