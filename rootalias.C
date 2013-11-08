@@ -78,7 +78,7 @@ void load(TString file)
   cout << endl;
   cout << " ====================================================" << endl;
   cout << endl;
-  cout << "    Try 'plot(eventNum, moduleNum, channelNum)'." << endl;
+  cout << "    Try 'plot(moduleNum, channelNum, eventNum)'." << endl;
   cout << "    For example, the first event in Channel 1" << endl;
   cout << "    of Module 2, 'plot(2, 1, 0)'" << endl;
   cout << endl;

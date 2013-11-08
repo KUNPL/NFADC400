@@ -176,7 +176,7 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
       // == End of Input delay ====================================================
 
       // == Start of ADC Offset ===================================================
-      fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC offset (0 - 4095) (ns)");
+      fTextAO = new TGLabel(fCh[iModule][iChannel], "ADC offset (0 - 4095)");
       fTextAO -> Move(7, 73);
       fAO[iModule][iChannel] = new TGNumberEntryField(fCh[iModule][iChannel], widgetID, 0, TGNumberFormat::kNESInteger, TGNumberFormat::kNEANonNegative, TGNumberFormat::kNELLimitMinMax, 0, 4095);
       fAO[iModule][iChannel] -> Connect("TextChanged(const Char_t *)", "NFADC400", this, "SetAO(const Char_t *)");
