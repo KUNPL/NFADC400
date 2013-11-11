@@ -123,7 +123,7 @@ NFADC400Process::NFADC400Process(NFADC400Settings settings)
       cout << " ========= End measuring pedestal =========" << endl;
 
       // Set trigger lookup table register (0xFFFE: OR, 0x8000: AND)
-      if (settings.fValueCLT[iModule])
+      if (settings.fValueTLT[iModule])
         fAdc.NFADC400write_TLT(fNKUSB, fModuleID[iModule], 0xFFFE); 
       else
         fAdc.NFADC400write_TLT(fNKUSB, fModuleID[iModule], 0x8000); 
@@ -215,7 +215,7 @@ void NFADC400Process::SaveHeader()
         fHeader[iModule] -> SetIAG(iChannel, fAdc.NFADC400read_DACGAIN(fNKUSB, fModuleID[iModule], iChannel + 1));
       }
 
-      fHeader[iModule] -> SetCLT(fAdc.NFADC400read_TLT(fNKUSB, fModuleID[iModule]));
+      fHeader[iModule] -> SetTLT(fAdc.NFADC400read_TLT(fNKUSB, fModuleID[iModule]));
       fHeader[iModule] -> SetTOW(fAdc.NFADC400read_TOW(fNKUSB, fModuleID[iModule]));
       fHeader[iModule] -> SetTDC(fAdc.NFADC400read_DCE(fNKUSB, fModuleID[iModule]));
 

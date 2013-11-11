@@ -30,7 +30,7 @@ void NFADC400Settings::Initialize()
       fValueIAG[iModule][iChannel] = 0;
     }
 
-    fValueCLT[iModule] = 0;
+    fValueTLT[iModule] = 0;
     fValueTOW[iModule] = 0;
     fValueTDC[iModule] = 0;
 
@@ -75,7 +75,7 @@ void NFADC400Settings::UseSameModuleSetting()
     }
   }
 
-  fValueCLT[1] = fValueCLT[0];
+  fValueTLT[1] = fValueTLT[0];
   fValueTOW[1] = fValueTOW[0];
   fValueTDC[1] = fValueTDC[0];
 

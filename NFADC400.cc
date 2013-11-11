@@ -216,16 +216,16 @@ NFADC400::NFADC400(const TGWindow *window, UInt_t width, UInt_t height)
     fModule[iModule] -> AddFrame(fTriggerFrame[iModule]);
 
     // == Start of Condition Lookup Table =======================================
-    fTextCLT[iModule] = new TGLabel(fTriggerFrame[iModule], "When trigger signals exist from all channels coincide.");
-    fTextCLT[iModule] -> Move(70, 25);
-    fTextCLT[iModule] -> SetTextJustify(kTextLeft);
-    fCLT[iModule] = new TGComboBox(fTriggerFrame[iModule], iModule);
-    fCLT[iModule] -> AddEntry("AND", 0);
-    fCLT[iModule] -> AddEntry("OR", 1);
-    fCLT[iModule] -> Connect("Selected(Int_t)", "NFADC400", this, "SetCLT(Int_t)");
-    fCLT[iModule] -> Select(0);
-    fCLT[iModule] -> MoveResize(10, 25, 55, 18);
-    fTriggerFrame[iModule] -> AddFrame(fCLT[iModule]);
+    fTextTLT[iModule] = new TGLabel(fTriggerFrame[iModule], "When trigger signals exist from all channels coincide.");
+    fTextTLT[iModule] -> Move(70, 25);
+    fTextTLT[iModule] -> SetTextJustify(kTextLeft);
+    fTLT[iModule] = new TGComboBox(fTriggerFrame[iModule], iModule);
+    fTLT[iModule] -> AddEntry("AND", 0);
+    fTLT[iModule] -> AddEntry("OR", 1);
+    fTLT[iModule] -> Connect("Selected(Int_t)", "NFADC400", this, "SetTLT(Int_t)");
+    fTLT[iModule] -> Select(0);
+    fTLT[iModule] -> MoveResize(10, 25, 55, 18);
+    fTriggerFrame[iModule] -> AddFrame(fTLT[iModule]);
     // == End of Condition Lookup Table =========================================
 
     // == Start of Trigger Output Width =========================================
@@ -633,24 +633,24 @@ void NFADC400::SetCW(const Char_t *value)
   fSettings.fValueCW[module][channel] = atoi(value);
 }
 
-void NFADC400::SetCLT(Int_t value)
+void NFADC400::SetTLT(Int_t value)
 {
   TGComboBox *object = (TGComboBox *) gTQSender;
   Int_t module = object -> WidgetId();
 
   if (fIsDebug) {
     cout << "=========================" << endl;
-    cout << " SetCLT module:" << module + 1;
+    cout << " SetTLT module:" << module + 1;
     cout << " is " << ( value ? "OR!" : "AND!" ) << endl;
     cout << "=========================" << endl;
   }
 
   if (value == 0)
-    fTextCLT[module] -> SetText("When trigger signals from all the channels coincide.");
+    fTextTLT[module] -> SetText("When trigger signals from all the channels coincide.");
   else
-    fTextCLT[module] -> SetText("Whenever a trigger signal exists from single channel.");
+    fTextTLT[module] -> SetText("Whenever a trigger signal exists from single channel.");
 
-  fSettings.fValueCLT[module] = value;
+  fSettings.fValueTLT[module] = value;
 }
 
 void NFADC400::SetTOW(const Char_t * value)
@@ -974,7 +974,7 @@ void NFADC400::SetSettingsToUI()
       fIAG[iModule][iChannel] -> SetText(Form("%d", fSettings.fValueIAG[iModule][iChannel]), kFALSE);
     }
 
-    fCLT[iModule] -> Select(fSettings.fValueCLT[iModule]);
+    fTLT[iModule] -> Select(fSettings.fValueTLT[iModule]);
     fTOW[iModule] -> SetText(Form("%d", fSettings.fValueTOW[iModule]), kFALSE);
     fTDC[iModule] -> Select(fSettings.fValueTDC[iModule]);
 

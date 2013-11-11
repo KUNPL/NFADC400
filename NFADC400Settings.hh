@@ -36,7 +36,7 @@ class NFADC400Settings
     Int_t fValueAO[2][4];
     Int_t fValueIAG[2][4];
 
-    Bool_t fValueCLT[2];
+    Bool_t fValueTLT[2];
     Int_t fValueTOW[2];
     Bool_t fValueTDC[2];
 

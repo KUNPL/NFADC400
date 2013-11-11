@@ -43,7 +43,7 @@ class NFADC400 : public TGMainFrame
     void SetIAG(const Char_t *);
     void SetRL(Int_t);
 
-    void SetCLT(Int_t);
+    void SetTLT(Int_t);
     void SetTOW(const Char_t *);
     void SetTDC(Int_t);
 
@@ -125,8 +125,8 @@ class NFADC400 : public TGMainFrame
     TGGroupFrame *fTriggerFrame[2];
 
     // Contidion Lookup Table
-    TGLabel *fTextCLT[2];
-    TGComboBox *fCLT[2];
+    TGLabel *fTextTLT[2];
+    TGComboBox *fTLT[2];
 
     // Trigger Output Width
     TGLabel *fTextTOW;

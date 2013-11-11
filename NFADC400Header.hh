@@ -35,11 +35,11 @@ class NFADC400Header : public TNamed
        Int_t GetAO(Int_t channel)               { return fAO[channel]; }
        Int_t GetIAG(Int_t channel)              { return fIAG[channel]; }
 
-        void SetCLT(Bool_t value)   { fCLT = value; }
+        void SetTLT(Bool_t value)   { fTLT = value; }
         void SetTOW(Int_t value)    { fTOW = value; }
         void SetTDC(Bool_t value)   { fTDC = value; }
 
-      Bool_t GetCLT()               { return fCLT; }
+      Bool_t GetTLT()               { return fTLT; }
        Int_t SetTOW()               { return fTOW; }
       Bool_t SetTDC()               { return fTDC; }
 
@@ -81,7 +81,7 @@ class NFADC400Header : public TNamed
     Int_t fIAG[4];
 
     // Triggers' Header
-    Bool_t fCLT;
+    Bool_t fTLT;
     Int_t fTOW;
     Bool_t fTDC;
     Int_t fThreshold[4];

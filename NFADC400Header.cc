@@ -39,7 +39,7 @@ void NFADC400Header::Initialize()
   }
 
   // Triggers' Header
-  fCLT = 0;
+  fTLT = 0;
   fTOW = 0;
   fTDC = 0;
 
@@ -70,7 +70,7 @@ void NFADC400Header::Print(Int_t channel)
     cout << setw(30) << "Recording length: " << 0.32*fRL << " us" << endl;
     cout << setw(30) << "Number of data point: " << 128*fRL << endl;
     cout << endl;
-    cout << setw(30) << "Trigger lookup table: " << (fCLT ? "OR" : "AND") << endl;
+    cout << setw(30) << "Trigger lookup table: " << (fTLT ? "OR" : "AND") << endl;
     cout << setw(30) << "Trigger output width: " << fTOW << " ns" << endl;
     cout << setw(30) << "Trigger daisy chain: " << (fTDC ? "disabled" : "enabled") << endl;
     cout << " ============================================" << endl;
