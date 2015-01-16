@@ -321,14 +321,18 @@ Int_t main(Int_t argc, Char_t ** argv) {
             event[iMod][iCh] = (NFADC400Event *) fEventArray[iMod][iCh] -> At(iEvent);
             Double_t *adc = event[iMod][iCh] -> GetADC();
 
-            Double_t sum = 0;
-            for (Int_t iTb = 0; iTb < fNumTbs[iMod]; iTb++)
-              sum += fPedestal[iMod][iCh] - adc[iTb];
+            Double_t peak = 0;
+            for (Int_t iTb = 0; iTb < fNumTbs[iMod]; iTb++) {
+              peak = fPedestal[iMod][iCh] - adc[iTb];
 
-            if (sum > fThreshold) {
-              passCriterion = kTRUE;
-              break;
+              if (peak > fThreshold) {
+                passCriterion = kTRUE;
+                break;
+              }
             }
+
+            if (passCriterion == kTRUE)
+              break;
           }
         }
       }
