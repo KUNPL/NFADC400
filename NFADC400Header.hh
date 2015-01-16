@@ -23,17 +23,20 @@ class NFADC400Header : public TNamed
         void SetRL(Int_t value) { fRL = value; }
        Int_t GetRL()            { return fRL; }
 
-        void SetAC(Int_t channel, Bool_t value) { fAC[channel] = value; }
-        void SetIP(Int_t channel, Bool_t value) { fIP[channel] = value; }
-        void SetID(Int_t channel, Int_t value)  { fID[channel] = value; }
-        void SetAO(Int_t channel, Int_t value)  { fAO[channel] = value; }
-        void SetIAG(Int_t channel, Int_t value) { fIAG[channel] = value; }
+        void SetAC(Int_t channel, Bool_t value)         { fAC[channel] = value; }
+        void SetIP(Int_t channel, Bool_t value)         { fIP[channel] = value; }
+        void SetID(Int_t channel, Int_t value)          { fID[channel] = value; }
+        void SetAO(Int_t channel, Int_t value)          { fAO[channel] = value; }
+        void SetIAG(Int_t channel, Int_t value)         { fIAG[channel] = value; }
+        void SetPedestal(Int_t channel, Double_t value) { fPedestal[channel] = value; }
+
 
       Bool_t GetAC(Int_t channel)               { return fAC[channel]; }
       Bool_t GetIP(Int_t channel)               { return fIP[channel]; }
        Int_t GetID(Int_t channel)               { return fID[channel]; }
        Int_t GetAO(Int_t channel)               { return fAO[channel]; }
        Int_t GetIAG(Int_t channel)              { return fIAG[channel]; }
+       Int_t GetPedestal(Int_t channel)         { return fPedestal[channel]; }
 
         void SetCLT(Bool_t value)   { fCLT = value; }
         void SetTOW(Int_t value)    { fTOW = value; }
@@ -79,6 +82,7 @@ class NFADC400Header : public TNamed
     Int_t fID[4];
     Int_t fAO[4];
     Int_t fIAG[4];
+    Double_t fPedestal[4];
 
     // Triggers' Header
     Bool_t fCLT;
@@ -93,7 +97,7 @@ class NFADC400Header : public TNamed
     Int_t fTMCountThreshold[4];
     Int_t fTMCountInterval[4];
   
-  ClassDef(NFADC400Header, 1);
+  ClassDef(NFADC400Header, 2);
 };
 
 #endif

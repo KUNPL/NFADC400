@@ -213,6 +213,7 @@ void NFADC400Process::SaveHeader()
         fHeader[iModule] -> SetID(iChannel, fAdc.NFADC400read_DLY(fNKUSB, fModuleID[iModule], iChannel + 1));
         fHeader[iModule] -> SetAO(iChannel, fAdc.NFADC400read_DACOFF(fNKUSB, fModuleID[iModule], iChannel + 1));
         fHeader[iModule] -> SetIAG(iChannel, fAdc.NFADC400read_DACGAIN(fNKUSB, fModuleID[iModule], iChannel + 1));
+        fHeader[iModule] -> SetPedestal(iChannel, fAdc.NFADC400read_PED(fNKUSB, fModuleID[iModule], iChannel + 1));
       }
 
       fHeader[iModule] -> SetCLT(fAdc.NFADC400read_TLT(fNKUSB, fModuleID[iModule]));
@@ -353,6 +354,8 @@ void NFADC400Process::DataRL1(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event1 *event = (NFADC400Event1 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -395,6 +398,8 @@ void NFADC400Process::DataRL2(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event2 *event = (NFADC400Event2 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
@@ -482,6 +487,8 @@ void NFADC400Process::DataRL8(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event8 *event = (NFADC400Event8 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -524,6 +531,8 @@ void NFADC400Process::DataRL16(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event16 *event = (NFADC400Event16 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
@@ -568,6 +577,8 @@ void NFADC400Process::DataRL32(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event32 *event = (NFADC400Event32 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -610,6 +621,8 @@ void NFADC400Process::DataRL64(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event64 *event = (NFADC400Event64 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
@@ -654,6 +667,8 @@ void NFADC400Process::DataRL128(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event128 *event = (NFADC400Event128 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -696,6 +711,8 @@ void NFADC400Process::DataRL256(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event256 *event = (NFADC400Event256 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
@@ -740,6 +757,8 @@ void NFADC400Process::DataRL512(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event512 *event = (NFADC400Event512 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -782,6 +801,8 @@ void NFADC400Process::DataRL1024(Int_t iModule, Int_t iChannel, Int_t bufferNum)
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event1024 *event = (NFADC400Event1024 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
@@ -826,6 +847,8 @@ void NFADC400Process::DataRL2048(Int_t iModule, Int_t iChannel, Int_t bufferNum)
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event2048 *event = (NFADC400Event2048 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
 
+    event -> SetEventID(fEventNum[iModule][iChannel]);
+
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
@@ -868,6 +891,8 @@ void NFADC400Process::DataRL4096(Int_t iModule, Int_t iChannel, Int_t bufferNum)
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
     NFADC400Event4096 *event = (NFADC400Event4096 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+
+    event -> SetEventID(fEventNum[iModule][iChannel]);
 
     Char_t tTimeChar[6];
     fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);

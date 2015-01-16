@@ -36,6 +36,7 @@ void NFADC400Header::Initialize()
     fID[iChannel] = 0;
     fAO[iChannel] = 0;
     fIAG[iChannel] = 0;
+    fPedestal[iChannel] = 0;
   }
 
   // Triggers' Header
