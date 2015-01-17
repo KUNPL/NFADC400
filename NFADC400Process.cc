@@ -245,16 +245,12 @@ void NFADC400Process::TakeData()
 {
   cout << " ======== Start taking data ========" << endl;
 
-  Bool_t channelFlag[2][4] = {0};
-
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     if (fActiveModule[iModule]) {
       Int_t recordingLength = fHeader[iModule] -> GetRL();
 
       for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
         if (fActiveChannel[iModule][iChannel]) {
-          channelFlag[iModule][iChannel] = 1;
-
           fOutFile -> cd();
           fEvent[iModule][iChannel] = new TClonesArray(Form("NFADC400Event%d", recordingLength), fHeader[iModule] -> GetNumEvents());
           fEventTree[iModule][iChannel] = new TTree(Form("Mod%dCh%d", iModule + 1, iChannel + 1), Form("Data of Module %d - Channel %d", iModule + 1, iChannel + 1));
@@ -267,68 +263,56 @@ void NFADC400Process::TakeData()
     }
   }
 
-  Int_t bufferNum[2] = {0};
-  Int_t isFill[2];
-  for (Int_t iModule = 0; iModule < 2; iModule++) {
-    isFill[iModule] = 1;
-
-    for (Int_t iChannel = 0; iChannel < 4; iChannel++)
-      fEventNum[iModule][iChannel] = 0;
-  }
+  Int_t bufferNum = 0;
+  for (Int_t iModule = 0; iModule < 2; iModule++)
+    fEventNum[iModule] = 0;
 
   Bool_t overallFlag = 1;
   while (overallFlag) {
-    Bool_t check = 0;
-    for (Int_t iModule = 0; iModule < 2; iModule++)
-      for (Int_t iChannel = 0; iChannel < 4; iChannel++)
-        check = (check | channelFlag[iModule][iChannel]);
-    overallFlag = check;
-
-    for (Int_t iModule = 0; iModule < 2; iModule++) {
-      for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
-        if (channelFlag[iModule][iChannel]) {
-          if (bufferNum[iModule] == 0)
-            isFill[iModule] = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[iModule]));
-          else if (bufferNum[iModule] == 1)
-            isFill[iModule] = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[iModule]));
-        }
+    Int_t isFill = 0;
+    while (!isFill) {
+      if (bufferNum == 0) {
+        if (fActiveModule[0]) isFill = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[0]));
+        if (fActiveModule[1]) isFill = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[1]));
+      } else if (bufferNum == 1) {
+        if (fActiveModule[0]) isFill = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[0]));
+        if (fActiveModule[1]) isFill = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[1]));
       }
     }
 
     for (Int_t iModule = 0; iModule < 2; iModule++) {
-      for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
-        if (channelFlag[iModule][iChannel] && isFill[iModule]) {
-          Int_t recordingLength = fHeader[iModule] -> GetRL();
-          switch (recordingLength) {
-            case 1: DataRL1(iModule, iChannel, bufferNum[iModule]); break;
-            case 2: DataRL2(iModule, iChannel, bufferNum[iModule]); break;
-            case 4: DataRL4(iModule, iChannel, bufferNum[iModule]); break;
-            case 8: DataRL8(iModule, iChannel, bufferNum[iModule]); break;
-            case 16: DataRL16(iModule, iChannel, bufferNum[iModule]); break;
-            case 32: DataRL32(iModule, iChannel, bufferNum[iModule]); break;
-            case 64: DataRL64(iModule, iChannel, bufferNum[iModule]); break;
-            case 128: DataRL128(iModule, iChannel, bufferNum[iModule]); break;
-            case 256: DataRL256(iModule, iChannel, bufferNum[iModule]); break;
-            case 512: DataRL512(iModule, iChannel, bufferNum[iModule]); break;
-            case 1024: DataRL1024(iModule, iChannel, bufferNum[iModule]); break;
-            case 2048: DataRL2048(iModule, iChannel, bufferNum[iModule]); break;
-            case 4096: DataRL4096(iModule, iChannel, bufferNum[iModule]); break;
-            default: break;
-          }
-
-          if (fEventNum[iModule][iChannel] >= fHeader[iModule] -> GetNumEvents())
-            channelFlag[iModule][iChannel] = 0;
-          else {
-            if (bufferNum[iModule] == 0) {
-              bufferNum[iModule] = 1;
-              fAdc.NFADC400startL(fNKUSB, fModuleID[iModule]); 
-            } else if (bufferNum[iModule] == 1) {
-              bufferNum[iModule] = 0;
-              fAdc.NFADC400startH(fNKUSB, fModuleID[iModule]); 
-            }
-          }
+      if (fActiveModule[iModule]) {
+        Int_t recordingLength = fHeader[iModule] -> GetRL();
+        switch (recordingLength) {
+          case 1: DataRL1(iModule, bufferNum); break;
+          case 2: DataRL2(iModule, bufferNum); break;
+          case 4: DataRL4(iModule, bufferNum); break;
+          case 8: DataRL8(iModule, bufferNum); break;
+          case 16: DataRL16(iModule, bufferNum); break;
+          case 32: DataRL32(iModule, bufferNum); break;
+          case 64: DataRL64(iModule, bufferNum); break;
+          case 128: DataRL128(iModule, bufferNum); break;
+          case 256: DataRL256(iModule, bufferNum); break;
+          case 512: DataRL512(iModule, bufferNum); break;
+          case 1024: DataRL1024(iModule, bufferNum); break;
+          case 2048: DataRL2048(iModule, bufferNum); break;
+          case 4096: DataRL4096(iModule, bufferNum); break;
+          default: break;
         }
+
+        if (fEventNum[iModule] >= fHeader[iModule] -> GetNumEvents())
+          overallFlag = 0;
       }
+    }
+
+    if (bufferNum == 0) {
+      bufferNum = 1;
+      if (fActiveModule[0]) fAdc.NFADC400startL(fNKUSB, fModuleID[0]); 
+      if (fActiveModule[1]) fAdc.NFADC400startL(fNKUSB, fModuleID[1]); 
+    } else if (bufferNum == 1) {
+      bufferNum = 0;
+      if (fActiveModule[0]) fAdc.NFADC400startH(fNKUSB, fModuleID[0]); 
+      if (fActiveModule[1]) fAdc.NFADC400startH(fNKUSB, fModuleID[1]); 
     }
   }
 
@@ -343,7 +327,7 @@ void NFADC400Process::TakeData()
   cout << " ========= End taking data =========" << endl;
 }
 
-void NFADC400Process::DataRL1(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL1(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -352,43 +336,47 @@ void NFADC400Process::DataRL1(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event1 *event = (NFADC400Event1 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event1 *event = (NFADC400Event1 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL1] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL1; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL1] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL1; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL2(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL2(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -397,43 +385,47 @@ void NFADC400Process::DataRL2(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event2 *event = (NFADC400Event2 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event2 *event = (NFADC400Event2 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL2] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL2; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL2] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL2; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL4(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL4(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -442,41 +434,47 @@ void NFADC400Process::DataRL4(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event4 *event = (NFADC400Event4 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      NFADC400Event4 *event = (NFADC400Event4 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      event -> SetEventID(fEventNum[iModule]);
 
-    event -> SetTriggerTime(tTime);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      event -> SetTriggerTime(tTime);
 
-    UShort_t data[RL4] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    for (Int_t iData = 0; iData < RL4; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    event = NULL;
+      UShort_t data[RL4] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      for (Int_t iData = 0; iData < RL4; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
+
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL8(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL8(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -485,43 +483,47 @@ void NFADC400Process::DataRL8(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event8 *event = (NFADC400Event8 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event8 *event = (NFADC400Event8 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL8] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL8; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL8] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL8; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL16(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL16(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -530,43 +532,47 @@ void NFADC400Process::DataRL16(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event16 *event = (NFADC400Event16 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event16 *event = (NFADC400Event16 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL16] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL16; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL16] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL16; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL32(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL32(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -575,43 +581,47 @@ void NFADC400Process::DataRL32(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event32 *event = (NFADC400Event32 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event32 *event = (NFADC400Event32 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL32] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL32; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL32] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL32; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL64(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL64(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -620,43 +630,47 @@ void NFADC400Process::DataRL64(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event64 *event = (NFADC400Event64 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event64 *event = (NFADC400Event64 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL64] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL64; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL64] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL64; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL128(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL128(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -665,43 +679,47 @@ void NFADC400Process::DataRL128(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event128 *event = (NFADC400Event128 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event128 *event = (NFADC400Event128 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL128] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL128; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL128] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL128; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL256(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL256(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -710,43 +728,47 @@ void NFADC400Process::DataRL256(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event256 *event = (NFADC400Event256 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event256 *event = (NFADC400Event256 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL256] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL256; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL256] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL256; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL512(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL512(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -755,43 +777,47 @@ void NFADC400Process::DataRL512(Int_t iModule, Int_t iChannel, Int_t bufferNum) 
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event512 *event = (NFADC400Event512 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event512 *event = (NFADC400Event512 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL512] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL512; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL512] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL512; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL1024(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL1024(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -800,43 +826,47 @@ void NFADC400Process::DataRL1024(Int_t iModule, Int_t iChannel, Int_t bufferNum)
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event1024 *event = (NFADC400Event1024 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event1024 *event = (NFADC400Event1024 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL1024] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL1024; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL1024] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL1024; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL2048(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL2048(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -845,43 +875,47 @@ void NFADC400Process::DataRL2048(Int_t iModule, Int_t iChannel, Int_t bufferNum)
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event2048 *event = (NFADC400Event2048 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event2048 *event = (NFADC400Event2048 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL2048] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL2048; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL2048] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL2048; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
 
-void NFADC400Process::DataRL4096(Int_t iModule, Int_t iChannel, Int_t bufferNum) {
+void NFADC400Process::DataRL4096(Int_t iModule, Int_t bufferNum) {
   Int_t recordingLength = fHeader[iModule] -> GetRL();
   Int_t numEvents = 0;
   if (recordingLength < 16)
@@ -890,38 +924,42 @@ void NFADC400Process::DataRL4096(Int_t iModule, Int_t iChannel, Int_t bufferNum)
     numEvents = 0x1000/recordingLength;
 
   for (Int_t iEvent = 0; iEvent < numEvents; iEvent++) {
-    NFADC400Event4096 *event = (NFADC400Event4096 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule][iChannel] + iEvent);
+    for (Int_t iChannel = 0; iChannel < 4; iChannel++) {
+      if (!fActiveChannel[iModule][iChannel])
+        continue;
 
-    event -> SetEventID(fEventNum[iModule][iChannel]);
+      NFADC400Event4096 *event = (NFADC400Event4096 *) fEvent[iModule][iChannel] -> ConstructedAt(fEventNum[iModule] + iEvent);
 
-    Char_t tTimeChar[6];
-    fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
+      event -> SetEventID(fEventNum[iModule]);
 
-    ULong64_t tTime = 0;
-    for (Int_t iBit = 0; iBit < 6; iBit++)
-      tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
+      Char_t tTimeChar[6];
+      fAdc.NFADC400read_TTIME(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent, tTimeChar);
 
-    event -> SetTriggerTime(tTime);
+      ULong64_t tTime = 0;
+      for (Int_t iBit = 0; iBit < 6; iBit++)
+        tTime += (((Int_t) (tTimeChar[iBit] & 0xFF)) << 8*iBit);
 
-    Char_t tPattern;
-    tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
+      event -> SetTriggerTime(tTime);
 
-    event -> SetWidthTrigger((tPattern & 0x2) >> 1);
-    event -> SetCountTrigger((tPattern & 0x1));
+      Char_t tPattern;
+      tPattern = fAdc.NFADC400read_TPattern(fNKUSB, fModuleID[iModule], iChannel + 1, bufferNum*numEvents + iEvent);
 
-    UShort_t data[RL4096] = {0};
-    fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
+      event -> SetWidthTrigger((tPattern & 0x2) >> 1);
+      event -> SetCountTrigger((tPattern & 0x1));
 
-    for (Int_t iData = 0; iData < RL4096; iData++)
-      event -> SetADC(iData, (data[iData] & 0x3FF));
+      UShort_t data[RL4096] = {0};
+      fAdc.NFADC400read_BUFFER(fNKUSB, fModuleID[iModule], iChannel + 1, recordingLength, bufferNum*numEvents + iEvent, data);
 
-    event = NULL;
+      for (Int_t iData = 0; iData < RL4096; iData++)
+        event -> SetADC(iData, (data[iData] & 0x3FF));
 
-    if (fEventNum[iModule][iChannel] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
-      fEventNum[iModule][iChannel] += iEvent + 1;
-      break;
+      event = NULL;
     }
-  }
 
-  fEventNum[iModule][iChannel] += numEvents;
+    if (fEventNum[iModule] + iEvent + 1 >= fHeader[iModule] -> GetNumEvents()) {
+      fEventNum[iModule] += iEvent + 1;
+      break;
+    } else if (iEvent + 1 == numEvents)
+      fEventNum[iModule] += numEvents;
+  }
 }
