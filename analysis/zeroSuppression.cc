@@ -282,13 +282,15 @@ Int_t main(Int_t argc, Char_t ** argv) {
   }
 
   if (fSelectedMod[0] & fSelectedMod[1]) {
-    cout << "== Error!: The event numbers of each module are different!" << endl;
-    cout << "=== Event number in module 1: " << fNumEvents[0] << endl;
-    cout << "=== Event number in module 2: " << fNumEvents[1] << endl;
-    cout << endl;
-    cout << "== Terminate program!" << endl;
+    if (fNumEvents[0] != fNumEvents[1]) {
+      cout << "== Error!: The event numbers of each module are different!" << endl;
+      cout << "=== Event number in module 1: " << fNumEvents[0] << endl;
+      cout << "=== Event number in module 2: " << fNumEvents[1] << endl;
+      cout << endl;
+      cout << "== Terminate program!" << endl;
 
-    return 0;
+      return 0;
+    }
   }
 
   TString outFile = argv[1];
@@ -299,7 +301,7 @@ Int_t main(Int_t argc, Char_t ** argv) {
   for (Int_t iMod = 0; iMod < 2; iMod++) {
     if (fSelectedMod[iMod]) {
       for (Int_t iCh = 0; iCh < 4; iCh++) {
-        if (fSelectedCh[iCh]) {
+        if (fSelectedCh[iMod][iCh]) {
           writeTree[iMod][iCh] = new TTree(Form("Mod%dCh%d", iMod + 1, iCh + 1), "");
           writeArray[iMod][iCh] = new TClonesArray(Form("NFADC400Event%d", (Int_t)(fNumTbs[iMod]/128)));
           writeTree[iMod][iCh] -> Branch("events", "TClonesArray", &writeArray[iMod][iCh]);
@@ -312,12 +314,12 @@ Int_t main(Int_t argc, Char_t ** argv) {
   NFADC400Event *event[2][4] = {{NULL}};
 
   for (Int_t iEvent = 0; iEvent < (fSelectedMod[0] ? fNumEvents[0] : fNumEvents[1]); iEvent++) {
-    Bool_t passCriterion = kFALSE;
+    Bool_t passFlag = kFALSE;
 
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       if (fSelectedMod[iMod]) {
         for (Int_t iCh = 0; iCh < 4; iCh++) {
-          if (fSelectedCh[iCh]) {
+          if (fSelectedCh[iMod][iCh]) {
             event[iMod][iCh] = (NFADC400Event *) fEventArray[iMod][iCh] -> At(iEvent);
             Double_t *adc = event[iMod][iCh] -> GetADC();
 
@@ -326,28 +328,29 @@ Int_t main(Int_t argc, Char_t ** argv) {
               peak = fPedestal[iMod][iCh] - adc[iTb];
 
               if (peak > fThreshold) {
-                passCriterion = kTRUE;
+                passFlag = kTRUE;
                 break;
               }
             }
 
-            if (passCriterion == kTRUE)
+            if (passFlag == kTRUE)
               break;
           }
         }
       }
 
-      if (passCriterion == kTRUE)
+      if (passFlag == kTRUE)
         break;
     }
 
-    if (!passCriterion)
+    if (!passFlag)
       continue;
+
 
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       if (fSelectedMod[iMod]) {
         for (Int_t iCh = 0; iCh < 4; iCh++) {
-          if (fSelectedCh[iCh]) {
+          if (fSelectedCh[iMod][iCh]) {
             event[iMod][iCh] = (NFADC400Event *) fEventArray[iMod][iCh] -> At(iEvent);
             switch ((Int_t)(fNumTbs[iMod]/128)) {
               case 1: DataRL1(fNewNumEvents[iMod], writeArray[iMod][iCh], event[iMod][iCh]); break;
@@ -375,21 +378,24 @@ Int_t main(Int_t argc, Char_t ** argv) {
   for (Int_t iMod = 0; iMod < 2; iMod++) {
     if (fSelectedMod[iMod]) {
       fHeader[iMod] -> SetNumEvents(fNewNumEvents[iMod]);
-      fHeader[iMod] -> Write();
       
       for (Int_t iCh = 0; iCh < 4; iCh++) {
-        if (fSelectedCh[iCh]) {
+	fHeader[iMod] -> SetAC(iCh, kFALSE);
+        if (fSelectedCh[iMod][iCh]) {
+          fHeader[iMod] -> SetAC(iCh, kTRUE);
 //          writeArray[iMod][iCh] -> Write();
           writeTree[iMod][iCh] -> Fill();
         }
       }
+
+      fHeader[iMod] -> Write();
     }
   }
 
   for (Int_t iMod = 0; iMod < 2; iMod++) {
     if (fSelectedMod[iMod]) {
       for (Int_t iCh = 0; iCh < 4; iCh++) {
-        if (fSelectedCh[iCh]) {
+        if (fSelectedCh[iMod][iCh]) {
 	  delete fEventArray[iMod][iCh];
           delete openTree[iMod][iCh];
         }
