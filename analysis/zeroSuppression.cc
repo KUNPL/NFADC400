@@ -250,7 +250,8 @@ Int_t main(Int_t argc, Char_t ** argv) {
       cout << "values in header" << endl;
     else 
       cout << fPedestalIn << endl;
-    cout << "== Threshold: " << fOrThreshold << endl;
+    cout << "== Or Threshold: " << fOrThreshold << endl;
+    cout << "== And Threshold: " << fAndThreshold << endl;
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       cout << "== Module " << iMod + 1 << ": " << (fSelectedMod[iMod] ? "Used" : "Not used") << endl;
       for (Int_t iCh = 0; iCh < 4; iCh++)
@@ -370,8 +371,9 @@ Int_t main(Int_t argc, Char_t ** argv) {
       for (Int_t iMod = 0; iMod < 2; iMod++) {
         if (fSelectedMod[iMod]) {
           for (Int_t iCh = 0; iCh < 4; iCh++) {
-            if ((fAndCh[iMod][iCh] & !andFlag[iMod][iCh]) & !orFlag)
-              passFlag = kFALSE;
+            if (fAndCh[iMod][iCh])
+              if (!andFlag[iMod][iCh] | !orFlag)
+                passFlag = kFALSE;
           }
         }
       }
@@ -379,20 +381,15 @@ Int_t main(Int_t argc, Char_t ** argv) {
       for (Int_t iMod = 0; iMod < 2; iMod++) {
         if (fSelectedMod[iMod]) {
           for (Int_t iCh = 0; iCh < 4; iCh++) {
-            if (fAndCh[iMod][iCh] & !andFlag[iMod][iCh])
-              passFlag = kFALSE;
+            if (fAndCh[iMod][iCh])
+              if (!andFlag[iMod][iCh])
+                passFlag = kFALSE;
           }
         }
       }
     } else if (!fAndUsed & fOrUsed) {
-      for (Int_t iMod = 0; iMod < 2; iMod++) {
-        if (fSelectedMod[iMod]) {
-          for (Int_t iCh = 0; iCh < 4; iCh++) {
-            if (!orFlag)
-              passFlag = kFALSE;
-          }
-        }
-      }
+      if (!orFlag)
+        passFlag = kFALSE;
     }
 
     if (!passFlag)
