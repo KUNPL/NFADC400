@@ -34,19 +34,19 @@ class NFADC400Process
     void TakeData();
     void SaveHeader();
 
-    void DataRL1(Int_t, Int_t, Int_t);
-    void DataRL2(Int_t, Int_t, Int_t);
-    void DataRL4(Int_t, Int_t, Int_t);
-    void DataRL8(Int_t, Int_t, Int_t);
-    void DataRL16(Int_t, Int_t, Int_t);
-    void DataRL32(Int_t, Int_t, Int_t);
-    void DataRL64(Int_t, Int_t, Int_t);
-    void DataRL128(Int_t, Int_t, Int_t);
-    void DataRL256(Int_t, Int_t, Int_t);
-    void DataRL512(Int_t, Int_t, Int_t);
-    void DataRL1024(Int_t, Int_t, Int_t);
-    void DataRL2048(Int_t, Int_t, Int_t);
-    void DataRL4096(Int_t, Int_t, Int_t);
+    void DataRL1(Int_t, Int_t);
+    void DataRL2(Int_t, Int_t);
+    void DataRL4(Int_t, Int_t);
+    void DataRL8(Int_t, Int_t);
+    void DataRL16(Int_t, Int_t);
+    void DataRL32(Int_t, Int_t);
+    void DataRL64(Int_t, Int_t);
+    void DataRL128(Int_t, Int_t);
+    void DataRL256(Int_t, Int_t);
+    void DataRL512(Int_t, Int_t);
+    void DataRL1024(Int_t, Int_t);
+    void DataRL2048(Int_t, Int_t);
+    void DataRL4096(Int_t, Int_t);
 
     NKNFADC400 fAdc; // NOTICE KOREA NFADC400 Class
     Int_t fNKUSB;
@@ -54,7 +54,7 @@ class NFADC400Process
     Int_t fActiveModule[2];
     Int_t fActiveChannel[2][4];
     Int_t fEventsToTake;
-    Int_t fEventNum[2][4];
+    Int_t fEventNum[2];
 
     TFile *fOutFile;
     NFADC400Header *fHeader[2];

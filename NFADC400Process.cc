@@ -61,6 +61,8 @@ NFADC400Process::NFADC400Process(NFADC400Settings settings)
   // Downlaod FPGA program into Xilinx for all 4 channels because of trigger lookup table
   for (Int_t iModule = 0; iModule < 2; iModule++) {
     if (fActiveModule[iModule]) {
+      fAdc.NFADC400open(fNKUSB, fModuleID[iModule]);
+
       cout << " ======== Start Checking FPGA Status of Module " << iModule + 1 << " ========" << endl;
       ULong_t status = fAdc.NFADC400read_STAT(fNKUSB, fModuleID[iModule]);
 
@@ -179,12 +181,12 @@ NFADC400Process::NFADC400Process(NFADC400Settings settings)
   if (fActiveModule[0]) {
     cout << endl;
     cout << "  Number of events in Mod1: " << fEventNum[0]<< endl;
-    cout << "  Trigger rate: " << fEventNum[0]/timer.RealTime() << endl;
+    cout << "  Trigger rate: " << fEventNum[0]/timer.RealTime() << " Hz" << endl;
   }
   if (fActiveModule[1]) {
     cout << endl;
     cout << "  Number of events in Mod2 " << fEventNum[1]<< endl;
-    cout << "  Trigger rate: " << fEventNum[1]/timer.RealTime() << endl;
+    cout << "  Trigger rate: " << fEventNum[1]/timer.RealTime() << " Hz" << endl;
   }
   cout << " ============================================" << endl;
   timer.Reset();
@@ -291,14 +293,18 @@ void NFADC400Process::TakeData()
 
   Bool_t overallFlag = 1;
   while (overallFlag) {
-    Int_t isFill = 0;
-    while (!isFill) {
+    Int_t isFill[2] = {0};
+    while (!(isFill[0] & isFill[1])) {
       if (bufferNum == 0) {
-        if (fActiveModule[0]) isFill = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[0]));
-        if (fActiveModule[1]) isFill = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[1]));
+        if (fActiveModule[0]) isFill[0] = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[0]));
+        else                  isFill[0] = 1;
+        if (fActiveModule[1]) isFill[1] = !(fAdc.NFADC400read_RunL(fNKUSB, fModuleID[1]));
+        else                  isFill[1] = 1;
       } else if (bufferNum == 1) {
-        if (fActiveModule[0]) isFill = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[0]));
-        if (fActiveModule[1]) isFill = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[1]));
+        if (fActiveModule[0]) isFill[0] = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[0]));
+        else                  isFill[0] = 1;
+        if (fActiveModule[1]) isFill[1] = !(fAdc.NFADC400read_RunH(fNKUSB, fModuleID[1]));
+        else                  isFill[1] = 1;
       }
     }
 
