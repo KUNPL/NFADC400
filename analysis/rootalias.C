@@ -54,7 +54,8 @@ NFADC400Event4096 *events4096;
 
 // User use functions
 void load(TString file);
-void plot(Int_t module, Int_t channel, Int_t eventNum);
+void plot(Int_t module, Int_t channel, Int_t eventNum, TCanvas *cvs = NULL);
+void scan(ULong64_t eventID = 0);
 void convert();
 
 // Internel use functions
@@ -123,7 +124,7 @@ void load(TString file)
   cout << endl;
 }
 
-void plot(Int_t module, Int_t channel, Int_t eventNum)
+void plot(Int_t module, Int_t channel, Int_t eventNum, TCanvas *cvs)
 {
   module -= 1;
   channel -= 1;
@@ -139,7 +140,12 @@ void plot(Int_t module, Int_t channel, Int_t eventNum)
     return;
   }
 
-  if (fCvs != NULL)
+  if (cvs != NULL) {
+    cvs -> cd(2*channel + 1 + module) -> Clear();
+    cvs -> cd(2*channel + 1 + module);
+
+    fGraph = new TGraph();
+  } else if (fCvs != NULL)
     PrepareCanvas(1);
   else
     PrepareCanvas();
@@ -165,6 +171,36 @@ void plot(Int_t module, Int_t channel, Int_t eventNum)
   fGraph -> GetYaxis() -> SetRangeUser(-5, 1024 + 5);
 
   delete adc;
+}
+
+void scan(ULong64_t eventID)
+{
+  gStyle -> SetPadLeftMargin(0.09);
+  gStyle -> SetPadRightMargin(0.03);
+  gStyle -> SetPadBottomMargin(0.1);
+  gStyle -> SetTitleSize(0.05, "x");
+  gStyle -> SetTitleOffset(1.00, "x");
+  gStyle -> SetTitleSize(0.05, "y");
+  gStyle -> SetTitleOffset(0.80, "y");
+
+  fCvs = new TCanvas("cvs", "", 1200, 800);
+  fCvs -> Divide(2, 4);
+
+  Char_t temp[255];
+  while (1) {
+    for (Int_t iMod = 0; iMod < 2; iMod++)
+      for (Int_t iCh = 0; iCh < 4; iCh++)
+        plot(iMod + 1, iCh + 1, eventID, fCvs);
+
+    fCvs -> Modified();
+    fCvs -> Update();
+
+    fgets(temp,255,stdin);
+    if(temp[0] == 'x' || temp[0] == 'X')
+      break;
+
+    eventID++;
+  }
 }
 
 void convert()
