@@ -48,15 +48,24 @@ class NFADC400Process
     void DataRL2048(Int_t, Int_t);
     void DataRL4096(Int_t, Int_t);
 
+    void StartFile(Int_t);
+    void EndFile();
+
     NKNFADC400 fAdc; // NOTICE KOREA NFADC400 Class
     Int_t fNKUSB;
     Int_t fModuleID[2];
     Int_t fActiveModule[2];
     Int_t fActiveChannel[2][4];
     Int_t fEventsToTake;
+    Int_t fTotalNumEvents[2];
     Int_t fEventNum[2];
+    Int_t fRL[2];
 
     TFile *fOutFile;
+    Int_t fFileNum;
+    Bool_t fFileStatus;
+    Int_t fDate;
+    Int_t fTime;
     NFADC400Header *fHeader[2];
     TTree *fEventTree[2][4];
     TClonesArray *fEvent[2][4];

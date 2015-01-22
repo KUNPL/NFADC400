@@ -157,18 +157,25 @@ void plot(Int_t module, Int_t channel, Int_t eventNum, TCanvas *cvs)
   for (Int_t iData = 0; iData < numData; iData++)
     fGraph -> SetPoint(iData, iData, adc[iData]);
 
-  fGraph -> Draw("APL same");
   fGraph -> SetTitle(Form("Module %d - Channel %d - Event %d", module + 1, channel + 1, eventNum));
   fGraph -> SetLineColor(2);
   fGraph -> SetMarkerColor(2);
-  fGraph -> GetXaxis() -> SetTitle("Time Bucket (2.5 ns)");
-  fGraph -> GetXaxis() -> CenterTitle();
-  fGraph -> GetXaxis() -> SetLimits(-10, recordingLength*128 + 10);
-  fGraph -> GetXaxis() -> SetRangeUser(-5, numData + 5);
-  fGraph -> GetYaxis() -> SetTitle("ADC Channel (A.U.)");
-  fGraph -> GetYaxis() -> CenterTitle();
-  fGraph -> GetYaxis() -> SetLimits(-15, 1024 + 15);
-  fGraph -> GetYaxis() -> SetRangeUser(-5, 1024 + 5);
+  fGraph -> GetHistogram() -> GetXaxis() -> SetTitle("Time Bucket (2.5 ns)");
+  fGraph -> GetHistogram() -> GetXaxis() -> CenterTitle();
+  fGraph -> GetHistogram() -> GetXaxis() -> SetLimits(-10, recordingLength*128 + 10);
+  fGraph -> GetHistogram() -> GetXaxis() -> SetRangeUser(-5, numData + 5);
+  fGraph -> GetHistogram() -> GetYaxis() -> SetTitle("ADC Channel (A.U.)");
+  fGraph -> GetHistogram() -> GetYaxis() -> CenterTitle();
+  fGraph -> GetHistogram() -> GetYaxis() -> SetLimits(-15, 1024 + 15);
+  fGraph -> GetHistogram() -> GetYaxis() -> SetRangeUser(-5, 1024 + 5);
+  if (cvs != NULL) {
+    fGraph -> GetHistogram() -> GetXaxis() -> SetLabelSize(0.08);
+    fGraph -> GetHistogram() -> GetXaxis() -> SetTitleSize(0.08);
+    fGraph -> GetHistogram() -> GetYaxis() -> SetLabelSize(0.08);
+    fGraph -> GetHistogram() -> GetYaxis() -> SetTitleSize(0.08);
+  }
+
+  fGraph -> Draw("APL same");
 
   delete adc;
 }
@@ -177,11 +184,11 @@ void scan(ULong64_t eventID)
 {
   gStyle -> SetPadLeftMargin(0.09);
   gStyle -> SetPadRightMargin(0.03);
-  gStyle -> SetPadBottomMargin(0.1);
-  gStyle -> SetTitleSize(0.05, "x");
-  gStyle -> SetTitleOffset(1.00, "x");
-  gStyle -> SetTitleSize(0.05, "y");
-  gStyle -> SetTitleOffset(0.80, "y");
+  gStyle -> SetPadBottomMargin(0.15);
+  gStyle -> SetTitleSize(0.08, "x");
+  gStyle -> SetTitleOffset(0.90, "x");
+  gStyle -> SetTitleSize(0.08, "y");
+  gStyle -> SetTitleOffset(0.60, "y");
 
   fCvs = new TCanvas("cvs", "", 1200, 800);
   fCvs -> Divide(2, 4);
