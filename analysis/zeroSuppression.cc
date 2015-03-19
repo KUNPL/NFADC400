@@ -217,19 +217,32 @@ Int_t main(Int_t argc, Char_t ** argv) {
   }
 
   Double_t fPedestalIn = 0;
-  Double_t fThreshold = 0;
+  Double_t fOrThreshold = 0;
+  Double_t fAndThreshold = 0;
   Bool_t fSelectedMod[2] = {0};
   Bool_t fSelectedCh[2][4] = {{0}};
+  Bool_t fOrCh[2][4] = {{0}};
+  Bool_t fAndCh[2][4] = {{0}};
+  Bool_t fOrUsed = kFALSE;
+  Bool_t fAndUsed = kFALSE;
 
   ifstream setting("zeroSuppression.setting");
   if (setting.is_open()) {
-    setting >> fPedestalIn >> fThreshold;
+    setting >> fPedestalIn >> fOrThreshold;
     for (Int_t iItem = 0; iItem < 8; iItem++)
-      setting >> fSelectedCh[iItem/4][iItem%4];
+      setting >> fOrCh[iItem/4][iItem%4];
+
+    setting >> fAndThreshold;
+    for (Int_t iItem = 0; iItem < 8; iItem++)
+      setting >> fAndCh[iItem/4][iItem%4];
 
     for (Int_t iCh = 0; iCh < 4; iCh++) {
-      fSelectedMod[0] |= fSelectedCh[0][iCh];
-      fSelectedMod[1] |= fSelectedCh[1][iCh];
+      fSelectedMod[0] |= fOrCh[0][iCh] | fAndCh[0][iCh];
+      fSelectedMod[1] |= fOrCh[1][iCh] | fAndCh[1][iCh];
+      fSelectedCh[0][iCh] |= fOrCh[0][iCh] | fAndCh[0][iCh];
+      fSelectedCh[1][iCh] |= fOrCh[1][iCh] | fAndCh[1][iCh];
+      fOrUsed |= fOrCh[0][iCh] | fOrCh[1][iCh];
+      fAndUsed |= fAndCh[0][iCh] | fAndCh[1][iCh];
     }
 
     cout << "== Pedestal: ";
@@ -237,11 +250,12 @@ Int_t main(Int_t argc, Char_t ** argv) {
       cout << "values in header" << endl;
     else 
       cout << fPedestalIn << endl;
-    cout << "== Threshold: " << fThreshold << endl;
+    cout << "== Or Threshold: " << fOrThreshold << endl;
+    cout << "== And Threshold: " << fAndThreshold << endl;
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       cout << "== Module " << iMod + 1 << ": " << (fSelectedMod[iMod] ? "Used" : "Not used") << endl;
       for (Int_t iCh = 0; iCh < 4; iCh++)
-        cout << "=== Ch " << iCh + 1 << ": " << (fSelectedCh[iMod][iCh] ? "Used" : "Not used") << endl;
+        cout << "=== Ch " << iCh + 1 << ": " << (fSelectedCh[iMod][iCh] ? (fAndCh[iMod][iCh] ? "AND" : "OR") : "Not used") << endl;
     }
     cout << endl;
   } else {
@@ -314,12 +328,13 @@ Int_t main(Int_t argc, Char_t ** argv) {
   NFADC400Event *event[2][4] = {{NULL}};
 
   for (Int_t iEvent = 0; iEvent < (fSelectedMod[0] ? fNumEvents[0] : fNumEvents[1]); iEvent++) {
-    Bool_t passFlag = kFALSE;
+    Bool_t orFlag = kFALSE;
+    Bool_t andFlag[2][4] = {{kFALSE, kFALSE, kFALSE, kFALSE}, {kFALSE, kFALSE, kFALSE, kFALSE}};
 
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       if (fSelectedMod[iMod]) {
         for (Int_t iCh = 0; iCh < 4; iCh++) {
-          if (fSelectedCh[iMod][iCh]) {
+          if (fOrCh[iMod][iCh] & !orFlag) {
             event[iMod][iCh] = (NFADC400Event *) fEventArray[iMod][iCh] -> At(iEvent);
             Double_t *adc = event[iMod][iCh] -> GetADC();
 
@@ -327,25 +342,58 @@ Int_t main(Int_t argc, Char_t ** argv) {
             for (Int_t iTb = 0; iTb < fNumTbs[iMod]; iTb++) {
               peak = fPedestal[iMod][iCh] - adc[iTb];
 
-              if (peak > fThreshold) {
-                passFlag = kTRUE;
+              if (peak > fOrThreshold) {
+                orFlag = kTRUE;
                 break;
               }
             }
+          }
+          if (fAndCh[iMod][iCh] & !andFlag[iMod][iCh]) {
+            event[iMod][iCh] = (NFADC400Event *) fEventArray[iMod][iCh] -> At(iEvent);
+            Double_t *adc = event[iMod][iCh] -> GetADC();
 
-            if (passFlag == kTRUE)
-              break;
+            Double_t peak = 0;
+            for (Int_t iTb = 0; iTb < fNumTbs[iMod]; iTb++) {
+              peak = fPedestal[iMod][iCh] - adc[iTb];
+
+              if (peak > fAndThreshold) {
+                andFlag[iMod][iCh] = kTRUE;
+                break;
+              }
+            }
           }
         }
       }
+    }
 
-      if (passFlag == kTRUE)
-        break;
+    Bool_t passFlag = kTRUE;
+    if (fAndUsed & fOrUsed) {
+      for (Int_t iMod = 0; iMod < 2; iMod++) {
+        if (fSelectedMod[iMod]) {
+          for (Int_t iCh = 0; iCh < 4; iCh++) {
+            if (fAndCh[iMod][iCh])
+              if (!andFlag[iMod][iCh] | !orFlag)
+                passFlag = kFALSE;
+          }
+        }
+      }
+    } else if (fAndUsed & !fOrUsed) {
+      for (Int_t iMod = 0; iMod < 2; iMod++) {
+        if (fSelectedMod[iMod]) {
+          for (Int_t iCh = 0; iCh < 4; iCh++) {
+            if (fAndCh[iMod][iCh])
+              if (!andFlag[iMod][iCh])
+                passFlag = kFALSE;
+          }
+        }
+      }
+    } else if (!fAndUsed & fOrUsed) {
+      if (!orFlag)
+        passFlag = kFALSE;
     }
 
     if (!passFlag)
       continue;
-
 
     for (Int_t iMod = 0; iMod < 2; iMod++) {
       if (fSelectedMod[iMod]) {
